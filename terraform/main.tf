@@ -15,9 +15,9 @@ resource "libvirt_cloudinit_disk" "commoninit" {
   count = 3 
   name = "commoninit-${count.index}.iso"
   pool = "default" 
-  user_data = file("${path.module}/cloud_init.tftpl", {
+  user_data = templatefile("${path.module}/cloud_init.tftpl", {
     ssh_key = var.ssh_public_key
-    })
+  })
 
   meta_data = jsonencode({
     "instance-id"    = "internal-vm-${count.index}"
