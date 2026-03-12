@@ -5,6 +5,7 @@ users:
     groups: [users, sudo]
     home: /home/egor
     shell: /bin/bash
+    passwd: ${password_hash}
     ssh_authorized_keys:
       - ${ssh_key}
 
