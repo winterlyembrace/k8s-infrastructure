@@ -17,6 +17,7 @@ resource "libvirt_cloudinit_disk" "commoninit" {
   pool = "default" 
   user_data = templatefile("${path.module}/cloud_init.tftpl", {
     ssh_key = var.ssh_public_key
+    password_hash = var.user_password_hash
   })
 
   meta_data = jsonencode({
