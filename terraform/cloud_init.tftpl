@@ -1,0 +1,16 @@
+#cloud-config
+users:
+  - name: egor
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: [users, sudo]
+    home: /home/egor
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ${ssh_key}
+
+packages:
+  - qemu-guest-agent
+  - openssh-server
+
+runcmd:
+  - [ systemctl, enable, --now, ssh ]
