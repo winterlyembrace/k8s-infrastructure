@@ -1,18 +1,24 @@
 #cloud-config
+
+ssh_pwauth: true
+chpasswd:
+  list: |
+     egor:${password_hash}
+  expire: False
+
 users:
   - name: egor
     sudo: ALL=(ALL) NOPASSWD:ALL
     groups: [users, sudo]
-    home: /home/egor
     shell: /bin/bash
-    passwd: ${password_hash}
+    passwd: "${password_hash}"
     ssh_authorized_keys:
       - ${ssh_key}
 
-packages:
-  - qemu-guest-agent
-  - openssh-server
-
-runcmd:
-  - [ systemctl, enable, --now, ssh ]
-  - [ systemctl, enable, --now, qemu-guest-agent ]
+# packages:
+#  - qemu-guest-agent
+#  - openssh-server
+#
+#runcmd:
+#  - [ systemctl, enable, --now, ssh ]
+#  - [ systemctl, enable, --now, qemu-guest-agent ]
