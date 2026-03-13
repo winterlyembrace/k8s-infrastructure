@@ -14,17 +14,20 @@ provider "libvirt" {
 
 
 resource "libvirt_cloudinit_disk" "commoninit" {
-  count = 3 
-  name = "commoninit-${count.index}.iso"
+  for_each = merge(var.k8s_nodes, var.edge_nodes, var.infra_nodes)
+
+  name = "commoninit-${each.key}.iso"
   pool = "default" 
+
   user_data = templatefile("${path.module}/cloud_init.tftpl", {
-    ssh_key = var.ssh_public_key
+    hostname      = each.key 
+    ssh_key       = var.ssh_public_key
     password_hash = var.user_password_hash
   })
 
   meta_data = jsonencode({
-    "instance-id"    = "internal-vm-${count.index}"
-    "local-hostname" = "internal-vm-${count.index}"
+    "instance-id"    = each.key
+    "local-hostname" = each.key
   })
 }
 
