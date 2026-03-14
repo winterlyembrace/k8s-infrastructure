@@ -1,4 +1,4 @@
-resource "libvirt_domain" "vm" {
+resource "libvirt_domain" "nodes" {
   for_each = merge(var.k8s_nodes, var.edge_nodes, var.infra_nodes)
 
   name   = each.key
@@ -27,7 +27,7 @@ resource "libvirt_domain" "vm" {
 
   
   disk {
-    volume_id = libvirt_volume.vm_disk[each.key].id
+    volume_id = libvirt_volume.disk[each.key].id
   }
 
   console {
