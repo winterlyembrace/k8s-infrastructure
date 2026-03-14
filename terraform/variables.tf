@@ -32,7 +32,7 @@ variable "edge_nodes" {
     cpu = number, ram = number, ip  = string, wan = bool
   }))
   default = {
-    "router" = { cpu = 1, ram = 512, ip = "192.168.100.1", wan = true }
+    "router" = { cpu = 1, ram = 512, ip = "192.168.100.2", wan = true }
     "lb-01" = { cpu = 1, ram = 512, ip = "192.168.100.30", wan = false }
   }
 }
