@@ -9,7 +9,7 @@ users:
       - ${ssh_key}
 
 runcmd:
-  %{ if hostname == "router" }
+  %{ if hostname == "bastion" }
 
   # Enable routing for router node
   - sysctl -w net.ipv4.ip_forward=1

@@ -1,16 +1,27 @@
-[router]
-# External router IP for SSH connect
-router_node ansible_host=${router_external_ip}
+[bastion]
+bastion_node ansible_host=${bastion_ext_ip}
 
-[k8s_nodes]
+[k8s]
 %{ for name, config in nodes ~}
-%{ if name != "router" ~}
+%{ if length(regexall("master|worker", name)) > 0 ~}
+${name} ansible_host=${config.ip}
+%{ endif ~}
+%{ endfor ~}
 
-# Internal nodes IPs
+[edge]
+%{ for name, config in nodes ~}
+%{ if length(regexall("lb|bastion", name)) > 0 ~}
+${name} ansible_host=${config.ip}
+%{ endif ~}
+%{ endfor ~}
+
+[infra]
+%{ for name, config in nodes ~}
+%{ if length(regexall("storage|logging", name)) > 0 ~}
 ${name} ansible_host=${config.ip}
 %{ endif ~}
 %{ endfor ~}
 
 [all:vars]
 ansible_user=egor
-ansible_ssh_common_args='-o ProxyJump=egor@${router_external_ip}'
+ansible_ssh_common_args='-o ProxyJump=egor@${bastion_ext_ip}'

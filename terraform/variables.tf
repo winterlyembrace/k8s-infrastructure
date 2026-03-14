@@ -3,11 +3,6 @@ variable "ssh_public_key" {
   type        = string
 }
 
-variable "user_password_hash" {
-  description = "Password hash for logging into VMs"
-  type	      = string
-}
-
 
 # Kubernetes cluster
 
@@ -25,15 +20,15 @@ variable "k8s_nodes" {
 }
 
 
-# Router & Load Balancer
+# Bastion & Load Balancer
 
 variable "edge_nodes" {
   type = map(object({
-    cpu = number, ram = number, ip  = string, wan = bool
+    cpu = number, ram = number, ip = string, wan = bool
   }))
   default = {
-    "router" = { cpu = 1, ram = 512, ip = "192.168.100.2", wan = true }
-    "lb-01" = { cpu = 1, ram = 512, ip = "192.168.100.30", wan = false }
+    "bastion" = { cpu = 1, ram = 512, ip = "192.168.100.2", wan = true }
+    "lb-01"   = { cpu = 1, ram = 512, ip = "192.168.100.30", wan = false }
   }
 }
 
@@ -46,5 +41,15 @@ variable "infra_nodes" {
   }))
   default = {
     "storage" = { cpu = 1, ram = 512, ip = "192.168.100.40" }
+    "logging" = { cpu = 1, ram = 512, ip = "192.168.100.41" }
+  }
+}
+
+variable "bastion_ip_config" {
+  type = object({
+    bastion_ext_ip = string
+  })
+  default = {
+    bastion_ext_ip = "192.168.122.252"
   }
 }

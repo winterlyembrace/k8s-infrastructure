@@ -24,7 +24,7 @@ resource "libvirt_domain" "nodes" {
     }
   }
 
-  
+
   disk {
     volume_id = libvirt_volume.disk[each.key].id
   }
