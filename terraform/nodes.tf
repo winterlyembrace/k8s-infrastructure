@@ -12,7 +12,6 @@ resource "libvirt_domain" "nodes" {
 
   network_interface {
     network_id = libvirt_network.k8s_net.id
-    addresses  = [each.value.ip]
   }
 
 
