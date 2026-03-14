@@ -1,0 +1,16 @@
+[router]
+# External router IP for SSH connect
+router_node ansible_host=${router_external_ip}
+
+[k8s_nodes]
+%{ for name, config in nodes ~}
+%{ if name != "router" ~}
+
+# Internal nodes IPs
+${name} ansible_host=${config.ip}
+%{ endif ~}
+%{ endfor ~}
+
+[all:vars]
+ansible_user=egor
+ansible_ssh_common_args='-o ProxyJump=egor@${router_external_ip}'
