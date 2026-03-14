@@ -12,6 +12,7 @@ resource "libvirt_cloudinit_disk" "commoninit" {
 
   network_config = templatefile("${path.module}/network_config.tftpl", {
     ip_address = each.value.ip
+    gateway    = each.key == "router" ? null : "192.168.100.2"
   })
 
   meta_data = jsonencode({
