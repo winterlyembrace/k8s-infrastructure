@@ -44,8 +44,3 @@ variable "infra_nodes" {
   }))
 }
 
-variable "bastion_ext_ip" {
-  description = "External bastion IP for Internet access"
-  type = string
-}
-  

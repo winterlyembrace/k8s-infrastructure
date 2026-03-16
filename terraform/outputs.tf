@@ -1,23 +1,51 @@
-resource "local_file" "ansible_config" {
-  content  = <<-EOT
-    [defaults]
-    inventory = inventory.ini
-    host_key_checking = False
-    remote_user = egor
-    roles_path = ./roles
+output "ansible_inventory" {
+  value = {
+    all = {
+      vars = {
+        ansible_user           = "egor"
+        jump_host_ip           = try(module.kvm_instance["bastion"].external_ip, null)
+        ansible_ssh_common_args = try(
+          "-o ProxyCommand=\"ssh -W %h:%p -q egor@${module.kvm_instance["bastion"].extenal_ip}\"", 
+          ""
+        )
+      }
+    }
+    
+    k8s_masters = {
+      hosts = {
+        for name, node in module.kvm_instance : name => { ansible_host = node.internal_ip }
+        if length(regexall("master", name)) > 0
+      }
+    }
 
-    [ssh_connection]
-    pipelining = True
-    ssh_args = -o ControlMaster=auto -o ControlPersist=60s
-  EOT
-  filename = "../ansible/ansible.cfg"
-}
+    k8s_workers = {
+      hosts = {
+        for name, node in module.kvm_instance : name => { ansible_host = node.internal_ip }
+        if length(regexall("worker", name)) > 0
+      }
+    }
 
+    infrastructure = {
+      hosts = {
+        for name, node in module.kvm_instance : name => { ansible_host = node.internal_ip }
+        if length(regexall("storage|logging", name)) > 0
+      }
+    }
 
-resource "local_file" "ansible_inventory" {
-  content = templatefile("${path.module}/templates/inventory.tftpl", {
-    bastion_ext_ip = var.bastion_ip_config.bastion_ext_ip
-    nodes          = merge(var.k8s_nodes, var.edge_nodes, var.infra_nodes)
-  })
-  filename = "../ansible/inventory.ini"
+    load_balancers = {
+      hosts = {
+        for name, node in module.kvm_instance : name => { ansible_host = node.internal_ip }
+        if length(regexall("lb", name)) > 0
+      }
+    }
+    
+    bastion = {
+      hosts = {
+        bastion = {
+          ansible_host            = try(module.kvm_instance["bastion"].external_ip, null)
+          ansible_ssh_common_args = "" 
+        }
+      }
+    }
+  }
 }

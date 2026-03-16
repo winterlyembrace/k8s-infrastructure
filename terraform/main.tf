@@ -38,7 +38,7 @@ resource "libvirt_network" "k8s_net" {
 
 
 module "kvm_instance" {
-  source   = "./modules/kvm_vm"
+  source   = "./modules/kvm_instance"
   for_each = merge(var.k8s_nodes, var.edge_nodes, var.infra_nodes)
 
   vm_name    = each.key
@@ -55,5 +55,4 @@ module "kvm_instance" {
   base_volume_id = libvirt_volume.ubuntu_base.id
   
   gateway        = each.key == "bastion" ? null : var.edge_nodes.bastion.ip
-  bastion_ext_ip = var.bastion_ext_ip
 }
