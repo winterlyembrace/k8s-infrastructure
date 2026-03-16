@@ -1,27 +1,34 @@
-[bastion]
-bastion_node ansible_host=${bastion_ext_ip}
-
-[k8s]
-%{ for name, config in nodes ~}
-%{ if length(regexall("master|worker", name)) > 0 ~}
-${name} ansible_host=${config.ip}
-%{ endif ~}
-%{ endfor ~}
-
-[edge]
-%{ for name, config in nodes ~}
-%{ if length(regexall("lb|bastion", name)) > 0 ~}
-${name} ansible_host=${config.ip}
-%{ endif ~}
-%{ endfor ~}
-
-[infra]
-%{ for name, config in nodes ~}
-%{ if length(regexall("storage|logging", name)) > 0 ~}
-${name} ansible_host=${config.ip}
-%{ endif ~}
-%{ endfor ~}
-
 [all:vars]
 ansible_user=egor
-ansible_ssh_common_args='-o ProxyJump=egor@${bastion_ext_ip}'
+ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -q egor@${bastion_ext_ip}"'
+
+[bastion]
+bastion ansible_host=${bastion_ext_ip} ansible_ssh_common_args='' as_number=${nodes.bastion.as_number}
+
+[k8s_masters]
+%{ for name, config in nodes ~}
+%{ if length(regexall("master", name)) > 0 ~}
+${name} ansible_host=${config.ip} as_number=${config.as_number}
+%{ endif ~}
+%{ endfor ~}
+
+[k8s_workers]
+%{ for name, config in nodes ~}
+%{ if length(regexall("worker", name)) > 0 ~}
+${name} ansible_host=${config.ip} as_number=${config.as_number}
+%{ endif ~}
+%{ endfor ~}
+
+[infrastructure]
+%{ for name, config in nodes ~}
+%{ if length(regexall("storage|logging", name)) > 0 ~}
+${name} ansible_host=${config.ip} as_number=${config.as_number}
+%{ endif ~}
+%{ endfor ~}
+
+[load_balancers]
+%{ for name, config in nodes ~}
+%{ if length(regexall("lb", name)) > 0 ~}
+${name} ansible_host=${config.ip} as_number=${config.as_number}
+%{ endif ~}
+%{ endfor ~}

@@ -4,52 +4,48 @@ variable "ssh_public_key" {
 }
 
 
-# Kubernetes cluster
 
 variable "k8s_nodes" {
+  description = "Configuration for Kubernetes cluster nodes, including both control-plane and worker roles"
   type = map(object({
-    cpu = number
-    ram = number
-    ip  = string
+    cpu       = number
+    ram       = number
+    ip        = string
+    as_number = number
+    disk_size = optional (number, 10)
   }))
-  default = {
-    "master-01" = { cpu = 2, ram = 1536, ip = "192.168.100.10" }
-    "worker-01" = { cpu = 1, ram = 1024, ip = "192.168.100.20" }
-    "worker-02" = { cpu = 1, ram = 1024, ip = "192.168.100.21" }
-  }
 }
 
 
-# Bastion & Load Balancer
 
 variable "edge_nodes" {
+  description = "Configuration for boundary nodes (ingress controllers, bastions, or load balancers) that handle external traffic and connectivity"
   type = map(object({
-    cpu = number, ram = number, ip = string, wan = bool
+    cpu       = number 
+    ram       = number 
+    ip        = string
+    ext_ip    = string
+    wan       = bool
+    as_number = number
+    disk_size = optional (number, 10)
   }))
-  default = {
-    "bastion" = { cpu = 1, ram = 512, ip = "192.168.100.2", wan = true }
-    "lb-01"   = { cpu = 1, ram = 512, ip = "192.168.100.30", wan = false }
-  }
 }
 
 
-# Storage
 
 variable "infra_nodes" {
+  description = "Configuration for infrastructure services nodes (storage, monitoring, logging, etc.)"
   type = map(object({
-    cpu = number, ram = number, ip = string
+    cpu       = number
+    ram       = number
+    ip        = string
+    as_number = number
+    disk_size = optional (number, 10)
   }))
-  default = {
-    "storage" = { cpu = 1, ram = 512, ip = "192.168.100.40" }
-    "logging" = { cpu = 1, ram = 512, ip = "192.168.100.41" }
-  }
 }
 
-variable "bastion_ip_config" {
-  type = object({
-    bastion_ext_ip = string
-  })
-  default = {
-    bastion_ext_ip = "192.168.122.252"
-  }
+variable "bastion_ext_ip" {
+  description = "External bastion IP for Internet access"
+  type = string
 }
+  

@@ -13,10 +13,13 @@ ethernets:
       addresses: [8.8.8.8, 1.1.1.1]
 
 
-# Enable static IP on WAN interface for the bastion node
+# Enable static IP on WAN interface for the bastion node & gateway 
   %{ if gateway == null } 
   ens4:
     dhcp4: false
     addresses:
-      - ${bastion_ext_ip}/24
+      - ${ext_ip}/24
+    routes:
+      - to: default
+        via: 192.168.122.1
   %{ endif }
