@@ -2,7 +2,7 @@ resource "libvirt_volume" "vm_disk" {
   name           = "${var.vm_name}-disk.qcow2"
   base_volume_id = var.base_volume_id
   format         = "qcow2"
-  size           = var.disk_size_gb * 1024 * 1024 * 1024
+  size           = var.disk_size * 1024 * 1024 * 1024
 }
 
 resource "libvirt_cloudinit_disk" "commoninit" {
@@ -35,7 +35,7 @@ resource "libvirt_domain" "node" {
 
   network_interface {
     network_id = var.network_id
-    addresses  = [var.ip_address]
+#    addresses  = [var.ip_address]
   }
 
   dynamic "network_interface" {

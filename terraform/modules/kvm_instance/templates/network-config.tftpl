@@ -4,7 +4,7 @@ ethernets:
     dhcp4: false
     addresses:
       - ${ip_address}/24
-    %{ if gateway != null }
+    %{ if ext_ip == null ~}
     routes:
       - to: default
         via: ${gateway}
@@ -13,8 +13,8 @@ ethernets:
       addresses: [8.8.8.8, 1.1.1.1]
 
 
-# Enable static IP on WAN interface for the bastion node & gateway 
-  %{ if gateway == null } 
+# Enable static IP on WAN interface for the edge nodes 
+  %{ if ext_ip != null ~} 
   ens4:
     dhcp4: false
     addresses:
