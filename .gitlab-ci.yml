@@ -16,8 +16,8 @@ variables:
   ANSIBLE_LINT_IMAGE: "pipelinecomponents/ansible-lint:${ANSIBLE_LINT_VER}"
 
   # --- Settings ---
-  TF_ROOT: "terraform"
-  ANSIBLE_ROOT: "ansible"
+  TF_ROOT: "./terraform"
+  ANSIBLE_ROOT: "./ansible"
   ANSIBLE_HOST_KEY_CHECKING: "False"
 
 terraform_validate:
@@ -40,6 +40,9 @@ ansible_lint:
   script:
     - cd $ANSIBLE_ROOT
     - ansible-lint site.yml
+  rules:
+    - changes:
+        - "$ANSIBLE_ROOT/**/*"
 
 terraform_plan:
   stage: plan
