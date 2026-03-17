@@ -1,6 +1,5 @@
 stages:
   - check
-
 test_my_server:
   stage: check
   tags:
