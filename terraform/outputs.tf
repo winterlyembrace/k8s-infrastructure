@@ -5,7 +5,7 @@ output "ansible_inventory" {
         ansible_user           = "egor"
         jump_host_ip           = try(module.kvm_instance["bastion"].external_ip, null)
         ansible_ssh_common_args = try(
-          "-o ProxyCommand=\"ssh -W %h:%p -q egor@${module.kvm_instance["bastion"].extenal_ip}\"", 
+          "-o ProxyCommand=\"ssh -W %h:%p -q egor@${module.kvm_instance["bastion"].external_ip}\"", 
           ""
         )
       }
