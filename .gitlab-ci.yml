@@ -22,6 +22,9 @@ ansible_lint:
   tags:
     - cluster-runner
   before_script:
+    - export DEBIAN_FRONTEND=noninteractive
+    - sudo -E apt-get update -y
+    - sudo -E apt-get install -y python3-venv
     - python3 -m venv venv
     - source venv/bin/activate
     - pip install ansible-lint ansible
@@ -49,21 +52,29 @@ terraform_apply:
   script:
     - cd $TF_ROOT
     - terraform apply -auto-approve tfplan
+    - terraform output -json ansible_inventory > ../ansible/inventory.json  
   when: manual
   allow_failure: false  
   dependencies:
     - terraform_plan
+  artifacts:
+    paths:
+      - $ANSIBLE_ROOT/inventory.json
 
 ansible_run:
   stage: provision
   tags:
     - cluster-runner
   before_script:
+    - export DEBIAN_FRONTEND=noninteractive
+    - sudo -E apt-get update -y
+    - sudo -E apt-get install -y python3-venv
     - source venv/bin/activate || python3 -m venv venv && source venv/bin/activate
     - pip install ansible
   script:
     - cd $ANSIBLE_ROOT
     - sleep 30 
-    - ansible-playbook -i inventory.ini site.yml
+    - ansible-playbook -i inventory.json site.yml --private-key=$SSH_PRIVATE_KEY
   dependencies:
     - terraform_apply
+    - terraform_plan
