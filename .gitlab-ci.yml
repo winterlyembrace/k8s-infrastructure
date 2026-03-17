@@ -8,12 +8,12 @@ variables:
   # --- Tools versions ---
   TF_VER: "1.7.5"
   ANSIBLE_VER: "2.16"
-  ANSIBLE_LINT_VER: "v24.2.0"
+  ANSIBLE_LINT_VER: "0.20.0"
 
   # --- Full image path ---
   TF_IMAGE: "hashicorp/terraform:${TF_VER}"
   ANSIBLE_IMAGE: "cytopia/ansible:${ANSIBLE_VER}"
-  ANSIBLE_LINT_IMAGE: "ansible/ansible-lint-action:${ANSIBLE_LINT_VER}"
+  ANSIBLE_LINT_IMAGE: "pipelinecomponents/ansible-lint:${ANSIBLE_LINT_VER}"
 
   # --- Settings ---
   TF_ROOT: "terraform"
