@@ -5,12 +5,18 @@ stages:
   - provision
 
 variables:
-  TF_ROOT: "./terraform"
-  ANSIBLE_ROOT: "./ansible"
+  TF_ROOT: "terraform"
+  ANSIBLE_ROOT: "ansible"
+  ANSIBLE_HOST_KEY_CHECKING: "False"
+  TERRAFORM_VER: "1.7.5"
+  ANSIBLE_VER: "2.16"
+  ANSIBLE_LINT_VER: "24.2.0"
 
 terraform_validate:
   stage: validate
-  image: hashicorp/terraform:light
+  image:
+    name: hashicorp/terraform:${TERRAFORM_VER}
+    entrypoint: [""]
   tags:
     - cluster-runner
   script:
@@ -20,7 +26,7 @@ terraform_validate:
 
 ansible_lint:
   stage: validate
-  image: monitorial/ansible-lint:latest
+  image: monitorial/ansible-lint:${ANSIBLE_LINT_VER}
   tags:
     - cluster-runner
   script:
@@ -29,7 +35,9 @@ ansible_lint:
 
 terraform_plan:
   stage: plan
-  image: hashicorp/terraform:light
+  image:
+    name: hashicorp/terraform:${TERRAFORM_VER}
+    entrypoint: [""]
   tags:
     - cluster-runner
   script:
@@ -43,7 +51,9 @@ terraform_plan:
 
 terraform_apply:
   stage: apply
-  image: hashicorp/terraform:light
+  image:
+    name: hashicorp/terraform:${TERRAFORM_VER}
+    entrypoint: [""]
   tags:
     - cluster-runner
   script:
@@ -60,7 +70,7 @@ terraform_apply:
 
 ansible_run:
   stage: provision
-  image: alpine/ansible:latest
+  image: cytopia/ansible:${ANSIBLE_VER}
   tags:
     - cluster-runner
   script:
