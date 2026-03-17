@@ -1,11 +1,69 @@
 stages:
-  - check
-test_my_server:
-  stage: check
+  - validate
+  - plan
+  - apply
+  - provision
+
+variables:
+  TF_ROOT: "./terraform"
+  ANSIBLE_ROOT: "./ansible"
+
+terraform_validate:
+  stage: validate
   tags:
     - cluster-runner
   script:
-    - echo "Working OK"
-    - terraform --version
-    - ansible --version
-    - docker ps
+    - cd $TF_ROOT
+    - terraform init -backend=false
+    - terraform validate
+
+ansible_lint:
+  stage: validate
+  tags:
+    - cluster-runner
+  before_script:
+    - python3 -m venv venv
+    - source venv/bin/activate
+    - pip install ansible-lint ansible
+  script:
+    - cd $ANSIBLE_ROOT
+    - ansible-lint site.yml
+
+terraform_plan:
+  stage: plan
+  tags:
+    - cluster-runner
+  script:
+    - cd $TF_ROOT
+    - terraform init
+    - terraform plan -out=tfplan
+  artifacts:
+    paths:
+      - $TF_ROOT/tfplan
+    expire_in: 1 hour
+
+terraform_apply:
+  stage: apply
+  tags:
+    - cluster-runner
+  script:
+    - cd $TF_ROOT
+    - terraform apply -auto-approve tfplan
+  when: manual
+  allow_failure: false  
+  dependencies:
+    - terraform_plan
+
+ansible_run:
+  stage: provision
+  tags:
+    - cluster-runner
+  before_script:
+    - source venv/bin/activate || python3 -m venv venv && source venv/bin/activate
+    - pip install ansible
+  script:
+    - cd $ANSIBLE_ROOT
+    - sleep 30 
+    - ansible-playbook -i inventory.ini site.yml
+  dependencies:
+    - terraform_apply
