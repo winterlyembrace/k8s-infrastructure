@@ -10,6 +10,7 @@ variables:
 
 terraform_validate:
   stage: validate
+  image: hashicorp/terraform:light
   tags:
     - cluster-runner
   script:
@@ -19,21 +20,16 @@ terraform_validate:
 
 ansible_lint:
   stage: validate
+  image: monitorial/ansible-lint:latest
   tags:
     - cluster-runner
-  before_script:
-    - export DEBIAN_FRONTEND=noninteractive
-    - sudo -E apt-get update -y
-    - sudo -E apt-get install -y python3-venv
-    - python3 -m venv venv
-    - source venv/bin/activate
-    - pip install ansible-lint ansible
   script:
     - cd $ANSIBLE_ROOT
     - ansible-lint site.yml
 
 terraform_plan:
   stage: plan
+  image: hashicorp/terraform:light
   tags:
     - cluster-runner
   script:
@@ -47,12 +43,13 @@ terraform_plan:
 
 terraform_apply:
   stage: apply
+  image: hashicorp/terraform:light
   tags:
     - cluster-runner
   script:
     - cd $TF_ROOT
     - terraform apply -auto-approve tfplan
-    - terraform output -json ansible_inventory > ../ansible/inventory.json  
+    - terraform output -json ansible_inventory > ../$ANSIBLE_ROOT/inventory.json  
   when: manual
   allow_failure: false  
   dependencies:
@@ -63,18 +60,12 @@ terraform_apply:
 
 ansible_run:
   stage: provision
+  image: alpine/ansible:latest
   tags:
     - cluster-runner
-  before_script:
-    - export DEBIAN_FRONTEND=noninteractive
-    - sudo -E apt-get update -y
-    - sudo -E apt-get install -y python3-venv
-    - source venv/bin/activate || python3 -m venv venv && source venv/bin/activate
-    - pip install ansible
   script:
     - cd $ANSIBLE_ROOT
     - sleep 30 
     - ansible-playbook -i inventory.json site.yml --private-key=$SSH_PRIVATE_KEY
   dependencies:
     - terraform_apply
-    - terraform_plan
