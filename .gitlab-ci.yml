@@ -1,0 +1,12 @@
+stages:
+  - check
+
+test_my_server:
+  stage: check
+  tags:
+    - cluster-runner
+  script:
+    - echo "Working OK"
+    - terraform --version
+    - ansible --version
+    - docker ps
