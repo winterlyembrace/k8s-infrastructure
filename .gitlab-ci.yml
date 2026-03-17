@@ -32,9 +32,6 @@ terraform_validate:
     - cd $TF_ROOT
     - terraform init -backend=false
     - terraform validate
-  cache:
-    paths:
-    - $TF_ROOT/.terraform.d/plugin-cache
 
 ansible_lint:
   stage: validate
@@ -63,9 +60,6 @@ terraform_plan:
     paths:
       - $TF_ROOT/tfplan
     expire_in: 1 hour
-  cache:
-    paths:
-    - $TF_ROOT/.terraform.d/plugin-cache
 
 terraform_apply:
   stage: apply
@@ -86,9 +80,6 @@ terraform_apply:
   artifacts:
     paths:
       - $ANSIBLE_ROOT/inventory.json
-  cache:
-    paths:
-    - $TF_ROOT/.terraform.d/plugin-cache
 
 ansible_run:
   stage: provision
