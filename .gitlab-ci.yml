@@ -1,3 +1,8 @@
+cache:
+  key: terraform-plugins
+  paths:
+    - .terraform.d/plugin-cache/
+
 stages:
   - validate
   - plan
@@ -21,6 +26,7 @@ variables:
   ANSIBLE_HOST_KEY_CHECKING: "False"
   TF_PLUGIN_CACHE_DIR: "$CI_PROJECT_DIR/.terraform.d/plugin-cache"
   TF_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/production"
+
 
 terraform_validate:
   stage: validate
