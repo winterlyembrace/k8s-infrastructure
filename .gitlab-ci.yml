@@ -68,7 +68,13 @@ terraform_apply:
     entrypoint: [""]
   tags:
     - cluster-runner
+  before_script:
+    - apk add --no-cache cdrkit
   script:
+    - whoami
+    - id
+    - ls -ld /var/lib/libvirt/images
+    - ls -l /var/lib/libvirt/images/noble-server-cloudimg-amd64.img || echo "Файла всё еще нет!"
     - cd $TF_ROOT
     - terraform init
     - terraform apply -auto-approve tfplan
