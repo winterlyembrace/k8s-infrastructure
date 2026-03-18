@@ -1,5 +1,5 @@
 log syslog all;
-router id {{ ansible_host }};
+router id {{ internal_ip | default(ansible_host) }};
 
 protocol device {
     scan time 10;
@@ -22,23 +22,26 @@ protocol static {
 
 template bgp neighbors {
     local as {{ as_number }};
+    multihop;
     ipv4 {
         import all;
         export all;
+	next hop self;
     };
 }
 
 {% if inventory_hostname == 'bastion' %}
 {% for host in groups['all'] %}
 {% if host != 'bastion' %}
-protocol bgp {{ host | replace('-', '_') }} from neighbors {
-    neighbor {{ hostvars[host]['ansible_host'] }} as {{ hostvars[host]['as_number'] }};
+protocol bgp peer_{{ host | replace('-', '_') }} from neighbors {
+    neighbor {{ hostvars[host]['internal_ip'] | default(hostvars[host]['ansible_host']) }} as {{ hostvars[host]['as_number'] }};
 }
 {% endif %}
 {% endfor %}
-{% else %}
 
+
+{% else %}
 protocol bgp bastion_link from neighbors {
-    neighbor {{ hostvars['bastion']['ansible_host'] }} as {{ hostvars['bastion']['as_number'] }};
+    neighbor {{ hostvars['bastion']['internal_ip'] | default(hostvars['bastion']['ansible_host']) }} as {{ hostvars['bastion']['as_number'] }};
 }
 {% endif %}

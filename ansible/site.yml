@@ -1,22 +1,16 @@
 ---
-- name: "Initial setup of k8s nodes"
-  hosts: web_servers
-  become: yes
+- name: Wait for nodes to become reachable
+  hosts: all
+  gather_facts: no 
   tasks:
-    - name: "Wait for system to become reachable"
+    - name: Wait for SSH to wake up
       wait_for_connection:
-        timeout: 60
+        delay: 5        
+        timeout: 300     
+        connect_timeout: 5
 
-    - name: "Update apt cache"
-      apt:
-        update_cache: yes
-        cache_valid_time: 3600
-
-    - name: "Check Docker version"
-      command: docker --version
-      register: docker_check
-      ignore_errors: yes
-
-    - name: "Show Docker version"
-      debug:
-        msg: "Docker is installed: {{ docker_check.stdout }}"
+- name: Configure BGP Networking
+  hosts: all
+  become: true
+  roles:
+    - bird

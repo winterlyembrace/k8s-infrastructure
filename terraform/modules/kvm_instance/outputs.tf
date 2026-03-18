@@ -5,3 +5,7 @@ output "internal_ip" {
 output "external_ip" {
   value = var.ext_ip 
 }
+
+output "as_number" {
+  value = var.as_number
+}

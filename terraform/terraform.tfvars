@@ -1,3 +1,5 @@
+ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBHXHvS2xVsqQfq6+x/1FGYHuBscK6ofEBZSZf3EyOAR 4icken00@gmail.com"
+
 k8s_nodes = {
   "k8s-master" = { 
     cpu = 2, 

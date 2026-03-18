@@ -14,19 +14,26 @@ variables:
   TF_VER: "1.7.5"
   ANSIBLE_VER: "2.16"
   ANSIBLE_LINT_VER: "0.20.0"
+  TFLINT_VER: "v0.50.3"
+  CHECKOV_VER: "3.2.30"
+  TFSEC_VER: "v1.28.5"
 
-  # --- Full image path ---
+  # --- Full image paths ---
   TF_IMAGE: "hashicorp/terraform:${TF_VER}"
   ANSIBLE_IMAGE: "cytopia/ansible:${ANSIBLE_VER}"
   ANSIBLE_LINT_IMAGE: "pipelinecomponents/ansible-lint:${ANSIBLE_LINT_VER}"
+  TFLINT_IMAGE: "ghcr.io/terraform-linters/tflint:${TFLINT_VER}"
+  CHECKOV_IMAGE: "bridgecrew/checkov:${CHECKOV_VER}"
+  TFSEC_IMAGE: "aquasec/tfsec:${TFSEC_VER}"
 
   # --- Settings ---
-  TF_ROOT: "terraform"
-  ANSIBLE_ROOT: "ansible"
+  TF_ROOT: "${CI_PROJECT_DIR}/terraform"
+  ANSIBLE_ROOT: "${CI_PROJECT_DIR}/ansible"
   ANSIBLE_HOST_KEY_CHECKING: "False"
-  TF_PLUGIN_CACHE_DIR: "$CI_PROJECT_DIR/.terraform.d/plugin-cache"
+  TF_PLUGIN_CACHE_DIR: "${CI_PROJECT_DIR}/.terraform.d/plugin-cache"
   TF_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/production"
 
+# --- Validation Jobs ---
 
 terraform_validate:
   stage: validate
@@ -36,9 +43,41 @@ terraform_validate:
   tags:
     - cluster-runner
   script:
-    - cd $TF_ROOT
+    - cd "${TF_ROOT}"
     - terraform init -backend=false
     - terraform validate
+
+terraform_tflint:
+  stage: validate
+  image:
+    name: ${TFLINT_IMAGE}
+    entrypoint: [""]
+  tags:
+    - cluster-runner
+  script:
+    - cd "${TF_ROOT}"
+    - tflint --init
+    - tflint --recursive
+
+terraform_tfsec:
+  stage: validate
+  image:
+    name: ${TFSEC_IMAGE}
+    entrypoint: [""]
+  tags:
+    - cluster-runner
+  script:
+    - tfsec "${TF_ROOT}"
+
+terraform_checkov:
+  stage: validate
+  image:
+    name: ${CHECKOV_IMAGE}
+    entrypoint: [""]
+  tags:
+    - cluster-runner
+  script:
+    - checkov -d "${TF_ROOT}" --framework terraform
 
 ansible_lint:
   stage: validate
@@ -46,7 +85,7 @@ ansible_lint:
   tags:
     - cluster-runner
   script:
-    - cd $ANSIBLE_ROOT
+    - cd "${ANSIBLE_ROOT}"
     - ansible-lint site.yml
 
 terraform_plan:
@@ -57,7 +96,7 @@ terraform_plan:
   tags:
     - cluster-runner
   script:
-    - cd $TF_ROOT
+    - cd "${TF_ROOT}"
     - terraform init \
         -backend-config="address=${TF_ADDRESS}" \
         -backend-config="lock_address=${TF_ADDRESS}/lock" \
@@ -70,7 +109,7 @@ terraform_plan:
     - terraform plan -out=tfplan
   artifacts:
     paths:
-      - $TF_ROOT/tfplan
+      - ${TF_ROOT}/tfplan
     expire_in: 1 hour
 
 terraform_apply:
@@ -83,11 +122,7 @@ terraform_apply:
   before_script:
     - apk add --no-cache cdrkit
   script:
-    - whoami
-    - id
-    - ls -ld /var/lib/libvirt/images
-    - ls -l /var/lib/libvirt/images/noble-server-cloudimg-amd64.img || echo "Файла всё еще нет!"
-    - cd $TF_ROOT
+    - cd "${TF_ROOT}"
     - terraform init \
         -backend-config="address=${TF_ADDRESS}" \
         -backend-config="lock_address=${TF_ADDRESS}/lock" \
@@ -98,14 +133,14 @@ terraform_apply:
         -backend-config="unlock_method=DELETE" \
         -backend-config="retry_wait_min=5"
     - terraform apply -auto-approve tfplan
-    - terraform output -json ansible_inventory > ../ansible/inventory.json  
+    - terraform output -json ansible_inventory > ${ANSIBLE_ROOT}/inventory.json  
   when: manual
   allow_failure: false  
   dependencies:
     - terraform_plan
   artifacts:
     paths:
-      - ansible/inventory.json
+      - ${ANSIBLE_ROOT}/inventory.json
 
 ansible_run:
   stage: provision
@@ -113,9 +148,8 @@ ansible_run:
   tags:
     - cluster-runner
   script:
-    - ls -la $ANSIBLE_ROOT/
-    - cd $ANSIBLE_ROOT
-    - sleep 30 
-    - ansible-playbook -i inventory.json site.yml --private-key=$SSH_PRIVATE_KEY
+    - cd "${ANSIBLE_ROOT}"
+    - chmod 400 "${SSH_PRIVATE_KEY}"
+    - ansible-playbook -i inventory.json site.yml --private-key="${SSH_PRIVATE_KEY}"
   dependencies:
     - terraform_apply

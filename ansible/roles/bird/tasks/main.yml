@@ -1,0 +1,43 @@
+---
+- name: Install Bird2
+  ansible.builtin.apt:
+    name: bird2
+    state: present
+    update_cache: true
+
+- name: Enable IPv4 forwarding
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: Deploy bird.conf template
+  ansible.builtin.template:
+    src: bird.conf.j2
+    dest: /etc/bird/bird.conf
+    owner: bird
+    group: bird
+    mode: '0640'
+  notify: Restart Bird
+
+- name: Ensure bird is running and enabled
+  ansible.builtin.service:
+    name: bird
+    state: started
+    enabled: true
+
+- name: Allow BGP traffic (TCP 179)
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: '179'
+    jump: ACCEPT
+    comment: "Allow BGP peering"
+
+- name: Allow established and related traffic
+  ansible.builtin.iptables:
+    chain: FORWARD
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
