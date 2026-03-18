@@ -1,12 +1,12 @@
 ---
 - name: Wait for nodes to become reachable
   hosts: all
-  gather_facts: no 
+  gather_facts: false
   tasks:
     - name: Wait for SSH to wake up
-      wait_for_connection:
-        delay: 5        
-        timeout: 300     
+      ansible.builtin.wait_for_connection:
+        delay: 5
+        timeout: 300
         connect_timeout: 5
 
 - name: Configure BGP Networking
