@@ -16,10 +16,11 @@ variables:
   ANSIBLE_LINT_IMAGE: "pipelinecomponents/ansible-lint:${ANSIBLE_LINT_VER}"
 
   # --- Settings ---
-  TF_ROOT: "./terraform"
-  ANSIBLE_ROOT: "./ansible"
+  TF_ROOT: "terraform"
+  ANSIBLE_ROOT: "ansible"
   ANSIBLE_HOST_KEY_CHECKING: "False"
   TF_PLUGIN_CACHE_DIR: "$CI_PROJECT_DIR/.terraform.d/plugin-cache"
+  TF_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/production"
 
 terraform_validate:
   stage: validate
@@ -54,7 +55,15 @@ terraform_plan:
     - cluster-runner
   script:
     - cd $TF_ROOT
-    - terraform init
+    - terraform init \
+        -backend-config="address=${TF_ADDRESS}" \
+        -backend-config="lock_address=${TF_ADDRESS}/lock" \
+        -backend-config="unlock_address=${TF_ADDRESS}/lock" \
+        -backend-config="username=${GITLAB_USER_LOGIN}" \
+        -backend-config="password=${CI_JOB_TOKEN}" \
+        -backend-config="lock_method=POST" \
+        -backend-config="unlock_method=DELETE" \
+        -backend-config="retry_wait_min=5"
     - terraform plan -out=tfplan
   artifacts:
     paths:
@@ -76,16 +85,24 @@ terraform_apply:
     - ls -ld /var/lib/libvirt/images
     - ls -l /var/lib/libvirt/images/noble-server-cloudimg-amd64.img || echo "Файла всё еще нет!"
     - cd $TF_ROOT
-    - terraform init
+    - terraform init \
+        -backend-config="address=${TF_ADDRESS}" \
+        -backend-config="lock_address=${TF_ADDRESS}/lock" \
+        -backend-config="unlock_address=${TF_ADDRESS}/lock" \
+        -backend-config="username=${GITLAB_USER_LOGIN}" \
+        -backend-config="password=${CI_JOB_TOKEN}" \
+        -backend-config="lock_method=POST" \
+        -backend-config="unlock_method=DELETE" \
+        -backend-config="retry_wait_min=5"
     - terraform apply -auto-approve tfplan
-    - terraform output -json ansible_inventory > ../$ANSIBLE_ROOT/inventory.json  
+    - terraform output -json ansible_inventory > ../ansible/inventory.json  
   when: manual
   allow_failure: false  
   dependencies:
     - terraform_plan
   artifacts:
     paths:
-      - $ANSIBLE_ROOT/inventory.json
+      - ansible/inventory.json
 
 ansible_run:
   stage: provision
@@ -93,6 +110,7 @@ ansible_run:
   tags:
     - cluster-runner
   script:
+    - ls -la $ANSIBLE_ROOT/
     - cd $ANSIBLE_ROOT
     - sleep 30 
     - ansible-playbook -i inventory.json site.yml --private-key=$SSH_PRIVATE_KEY

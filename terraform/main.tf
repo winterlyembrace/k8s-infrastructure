@@ -1,4 +1,10 @@
 terraform {
+  backend "http" {
+  }
+}
+
+
+terraform {
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
