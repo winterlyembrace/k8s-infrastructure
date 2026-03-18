@@ -1,3 +1,7 @@
+terraform {
+  required_version = "~>= 1.7.0"
+}
+
 resource "libvirt_volume" "vm_disk" {
   name           = "${var.vm_name}-disk.qcow2"
   base_volume_id = var.base_volume_id
