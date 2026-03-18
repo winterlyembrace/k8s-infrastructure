@@ -42,9 +42,6 @@ ansible_lint:
   script:
     - cd $ANSIBLE_ROOT
     - ansible-lint site.yml
-  rules:
-    - changes:
-        - "$ANSIBLE_ROOT/**/*"
 
 terraform_plan:
   stage: plan
