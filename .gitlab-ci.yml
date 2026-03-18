@@ -12,16 +12,14 @@ stages:
 variables:
   # --- Tools versions ---
   TF_VER: "1.7.5"
-  ANSIBLE_VER: "2.16"
-  ANSIBLE_LINT_VER: "0.20.0"
+  ANSIBLE_VER: "v0.1"
   TFLINT_VER: "v0.50.3"
   CHECKOV_VER: "3.2.30"
   TFSEC_VER: "v1.28.5"
 
   # --- Full image paths ---
   TF_IMAGE: "hashicorp/terraform:${TF_VER}"
-  ANSIBLE_IMAGE: "cytopia/ansible:${ANSIBLE_VER}"
-  ANSIBLE_LINT_IMAGE: "pipelinecomponents/ansible-lint:${ANSIBLE_LINT_VER}"
+  ANSIBLE_IMAGE: "winterlyembrace/ansible-ci:${ANSIBLE_VER}"
   TFLINT_IMAGE: "ghcr.io/terraform-linters/tflint:${TFLINT_VER}"
   CHECKOV_IMAGE: "bridgecrew/checkov:${CHECKOV_VER}"
   TFSEC_IMAGE: "aquasec/tfsec:${TFSEC_VER}"
@@ -81,7 +79,7 @@ terraform_checkov:
 
 ansible_lint:
   stage: validate
-  image: ${ANSIBLE_LINT_IMAGE}
+  image: ${ANSIBLE_IMAGE}
   tags:
     - cluster-runner
   script:
