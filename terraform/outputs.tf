@@ -15,7 +15,7 @@ output "ansible_inventory" {
       hosts = {
         for name, node in module.kvm_instance : name => { 
           ansible_host = node.internal_ip
-          as_number    = node.as_number # Берем из переменной модуля
+          as_number    = node.as_number
         }
         if length(regexall("master", name)) > 0
       }
@@ -25,7 +25,7 @@ output "ansible_inventory" {
       hosts = {
         for name, node in module.kvm_instance : name => { 
           ansible_host = node.internal_ip
-          as_number    = node.as_number # Берем из переменной модуля
+          as_number    = node.as_number
         }
         if length(regexall("worker", name)) > 0
       }
@@ -35,7 +35,7 @@ output "ansible_inventory" {
       hosts = {
         for name, node in module.kvm_instance : name => { 
           ansible_host = node.internal_ip
-          as_number    = node.as_number # Берем из переменной модуля
+          as_number    = node.as_number
         }
         if length(regexall("storage|logging", name)) > 0
       }
@@ -45,7 +45,7 @@ output "ansible_inventory" {
       hosts = {
         for name, node in module.kvm_instance : name => { 
           ansible_host = node.internal_ip
-          as_number    = node.as_number # Берем из переменной модуля
+          as_number    = node.as_number
         }
         if length(regexall("lb", name)) > 0
       }
