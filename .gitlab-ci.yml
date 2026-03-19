@@ -150,7 +150,15 @@ ansible_run:
     - chmod 400 "${SSH_PRIVATE_KEY}"
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
     - touch ~/.ssh/known_hosts
-    - jq -r '.bastion.hosts.bastion.ansible_host' inventory.json | ssh-keyscan -H >> ~/.ssh/known_hosts
+    - |
+      BASTION_IP=$(jq -r '.bastion.hosts.bastion.ansible_host // empty' inventory.json)
+      if [ -n "$BASTION_IP" ]; then
+        echo "Scanning bastion at $BASTION_IP..."
+        ssh-keyscan -H "$BASTION_IP" >> ~/.ssh/known_hosts
+      else
+        echo "ERROR: Bastion IP not found in inventory.json"
+        exit 1
+      fi
     - chmod 644 ~/.ssh/known_hosts
     - ansible-playbook -i inventory.json site.yml --private-key="${SSH_PRIVATE_KEY}"
   dependencies:
