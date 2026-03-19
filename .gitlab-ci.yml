@@ -131,7 +131,8 @@ terraform_apply:
       -backend-config="unlock_method=DELETE"
       -backend-config="retry_wait_min=5"
     - terraform apply -auto-approve tfplan
-    - terraform output -json ansible_inventory > ${ANSIBLE_ROOT}/inventory.json  
+    - terraform output -json ansible_inventory > ${ANSIBLE_ROOT}/inventory.json
+    - cat inventory.json 
   when: manual
   allow_failure: false  
   dependencies:

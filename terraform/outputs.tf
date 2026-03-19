@@ -48,7 +48,7 @@ output "ansible_inventory" {
       }
     }
     
-    bastion = {
+    bastions = {
       hosts = {
         bastion = {
           ansible_host            = try(module.kvm_instance["bastion"].external_ip, null)
