@@ -3,7 +3,12 @@ output "ansible_inventory" {
     all = {
       vars = {
         ansible_user            = "egor"
-        jump_host_ip            = try(module.kvm_instance["bastion"].external_ip, null)
+      }
+    }
+
+    internal_network = {
+      children = ["k8s_masters", "k8s_workers", "infrastructure", "load_balancers"]
+      vars = {
         ansible_ssh_common_args = "-o ProxyJump=egor@${module.kvm_instance["bastion"].external_ip} -o StrictHostKeyChecking=no"
       }
     }
@@ -54,7 +59,6 @@ output "ansible_inventory" {
           ansible_host            = try(module.kvm_instance["bastion"].external_ip, null)
 	  internal_ip             = try(module.kvm_instance["bastion"].internal_ip, null)
           as_number               = try(module.kvm_instance["bastion"].as_number, 65000)
-	  ansible_ssh_common_args = "-o ProxyJump=none"
         }
       }
     }
