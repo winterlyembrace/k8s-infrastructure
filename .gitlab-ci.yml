@@ -30,6 +30,8 @@ variables:
   ANSIBLE_HOST_KEY_CHECKING: "False"
   TF_PLUGIN_CACHE_DIR: "${CI_PROJECT_DIR}/.terraform.d/plugin-cache"
   TF_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/production"
+  TF_HTTP_USERNAME: "${GITLAB_USER_LOGIN}"
+  TF_HTTP_PASSWORD: "${CI_JOB_TOKEN}"
 
 # --- Validation Jobs ---
 
