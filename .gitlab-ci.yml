@@ -132,7 +132,7 @@ terraform_apply:
       -backend-config="retry_wait_min=5"
     - terraform apply -auto-approve tfplan
     - terraform output -json ansible_inventory > ${ANSIBLE_ROOT}/inventory.json
-    - cat inventory.json 
+    - cat ${ANSIBLE_ROOT}/inventory.json 
   when: manual
   allow_failure: false  
   dependencies:
