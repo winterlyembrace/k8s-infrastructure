@@ -159,6 +159,9 @@ ansible_run:
         echo "ERROR: Bastion IP not found in inventory.json"
         exit 1
       fi
+      SSH_USER=$(jq -r '.all.vars.ansible_user' inventory.json)
+      INTERNAL_IPS=$(jq -r '.. | .ansible_host? // empty' inventory.json | grep -v "$BASTION_IP" | xargs)
+      ssh -o StrictHostKeyChecking=no -i "${SSH_PRIVATE_KEY}" "${SSH_USER}@${BASTION_IP}" "ssh-keyscan $INTERNAL_IPS" >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
     - ansible-playbook -i inventory.json site.yml --private-key="${SSH_PRIVATE_KEY}"
   dependencies:
