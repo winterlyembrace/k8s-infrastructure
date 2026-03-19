@@ -152,7 +152,7 @@ ansible_run:
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
     - touch ~/.ssh/known_hosts
     - |
-      BASTION_IP=$(jq -r '.bastion.hosts.bastion.ansible_host // empty' inventory.json)
+      BASTION_IP=$(jq -r '.bastions.hosts.bastion.ansible_host // empty' inventory.json)
       if [ -n "$BASTION_IP" ]; then
         echo "Scanning bastion at $BASTION_IP..."
         ssh-keyscan -H "$BASTION_IP" >> ~/.ssh/known_hosts
