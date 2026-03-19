@@ -2,17 +2,19 @@ output "ansible_inventory" {
   value = {
     all = {
       vars = {
-        ansible_user            = "egor"
+        ansible_user = "egor"
       }
     }
 
     internal_network = {
-      children = ["k8s_masters", "k8s_workers", "infrastructure", "load_balancers"]
+      children = {
+        for group in ["k8s_masters", "k8s_workers", "infrastructure", "load_balancers"] : group => {}
+      }
       vars = {
         ansible_ssh_common_args = "-o ProxyJump=egor@${module.kvm_instance["bastion"].external_ip} -o StrictHostKeyChecking=no"
       }
-    }
-    
+    } 
+
     k8s_masters = {
       hosts = {
         for name, node in module.kvm_instance : name => { 
