@@ -12,12 +12,12 @@ terraform {
 
     local = {
       source  = "hashicorp/local"
-      version = "~> 2.0.0"
+      version = "~> 2.7.0"
     }
 
     libvirt = {
       source  = "dmacvicar/libvirt"
-      version = "~> 0.7.1"
+      version = "~> 0.8.1"
     }
   }
 }
