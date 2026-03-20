@@ -1,9 +1,10 @@
-variable "ssh_public_key" {
-  description = "Public SSH key for user egor"
+variable "host_ca_key_path" {
   type        = string
-  sensitive   = true
 }
 
+variable "user_ca_pub_path" {
+  type        = string
+}
 
 
 variable "k8s_nodes" {
