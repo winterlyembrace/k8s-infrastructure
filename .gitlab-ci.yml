@@ -149,7 +149,7 @@ ansible_run:
   script:
     - cd "${ANSIBLE_ROOT}"
     - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | ssh-add -
+    - cat "$SSH_PRIVATE_KEY" | ssh-add -
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
     - |
       BASTION_IP=$(jq -r '.bastions.hosts.bastion.ansible_host // empty' inventory.json)
