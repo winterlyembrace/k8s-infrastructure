@@ -148,22 +148,22 @@ ansible_run:
     - cluster-runner
   script:
     - cd "${ANSIBLE_ROOT}"
-    - chmod 400 "${SSH_PRIVATE_KEY}"
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | ssh-add -
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
-    - touch ~/.ssh/known_hosts
     - |
       BASTION_IP=$(jq -r '.bastions.hosts.bastion.ansible_host // empty' inventory.json)
-      if [ -n "$BASTION_IP" ]; then
-        echo "Scanning bastion at $BASTION_IP..."
-        ssh-keyscan -H "$BASTION_IP" >> ~/.ssh/known_hosts
-      else
-        echo "ERROR: Bastion IP not found in inventory.json"
-        exit 1
-      fi
-      SSH_USER=$(jq -r '.all.vars.ansible_user' inventory.json)
-      INTERNAL_IPS=$(jq -r '.. | .ansible_host? // empty' inventory.json | grep -v "$BASTION_IP" | xargs)
-      ssh -o StrictHostKeyChecking=no -i "${SSH_PRIVATE_KEY}" "${SSH_USER}@${BASTION_IP}" "ssh-keyscan $INTERNAL_IPS" >> ~/.ssh/known_hosts
+      if [ -z "$BASTION_IP" ]; then echo "No Bastion IP"; exit 1; fi
+      
+      ssh-keyscan -H "$BASTION_IP" >> ~/.ssh/known_hosts
+      
+      INTERNAL_IPS=$(jq -r '.. | .ansible_host? | select(. != null and . != "'$BASTION_IP'")' inventory.json)
+      
+      for ip in $INTERNAL_IPS; do
+        ssh -o ProxyCommand="ssh -W %h:%p $BASTION_IP" -o StrictHostKeyChecking=no "$ip" /bin/true 2>/dev/null
+        ssh-keyscan -H "$ip" >> ~/.ssh/known_hosts
+      done
     - chmod 644 ~/.ssh/known_hosts
-    - ansible-playbook -i inventory.json site.yml --private-key="${SSH_PRIVATE_KEY}"
+    - ansible-playbook -i inventory.json site.yml -vvv
   dependencies:
     - terraform_apply
