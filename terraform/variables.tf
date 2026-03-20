@@ -1,12 +1,3 @@
-variable "host_ca_key_path" {
-  type = string
-}
-
-variable "user_ca_pub_path" {
-  type = string
-}
-
-
 variable "k8s_nodes" {
   description = "Configuration for Kubernetes cluster nodes, including both control-plane and worker roles"
   type = map(object({

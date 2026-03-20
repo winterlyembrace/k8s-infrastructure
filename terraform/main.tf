@@ -57,9 +57,8 @@ module "kvm_instance" {
   wan    = lookup(each.value, "wan", false)
   ext_ip = lookup(each.value, "ext_ip", null)
 
-  ssh_key        = var.ssh_public_key
-  network_id     = libvirt_network.k8s_net.id
-  base_volume_id = libvirt_volume.ubuntu_base.id
+  network_id       = libvirt_network.k8s_net.id
+  base_volume_id   = libvirt_volume.ubuntu_base.id
 
   gateway = each.key == "bastion" ? null : var.edge_nodes.bastion.ip
 }
