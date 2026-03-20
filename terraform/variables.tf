@@ -1,9 +1,9 @@
 variable "host_ca_key_path" {
-  type        = string
+  type = string
 }
 
 variable "user_ca_pub_path" {
-  type        = string
+  type = string
 }
 
 
@@ -14,7 +14,7 @@ variable "k8s_nodes" {
     ram       = number
     ip        = string
     as_number = number
-    disk_size = optional (number, 10)
+    disk_size = optional(number, 10)
   }))
 }
 
@@ -23,13 +23,13 @@ variable "k8s_nodes" {
 variable "edge_nodes" {
   description = "Configuration for boundary nodes (ingress controllers, bastions, or load balancers) that handle external traffic and connectivity"
   type = map(object({
-    cpu       = number 
-    ram       = number 
+    cpu       = number
+    ram       = number
     ip        = string
     ext_ip    = string
     wan       = bool
     as_number = number
-    disk_size = optional (number, 10)
+    disk_size = optional(number, 10)
   }))
 }
 
@@ -42,7 +42,7 @@ variable "infra_nodes" {
     ram       = number
     ip        = string
     as_number = number
-    disk_size = optional (number, 10)
+    disk_size = optional(number, 10)
   }))
 }
 

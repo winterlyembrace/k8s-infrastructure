@@ -16,7 +16,7 @@ resource "tls_private_key" "host_key" {
 resource "null_resource" "sign_host_key" {
   triggers = {
     public_key = tls_private_key.host_key.public_key_openssh
-    ip         = var.ip_address 
+    ip         = var.ip_address
   }
 
   provisioner "local-exec" {
@@ -36,20 +36,20 @@ data "local_file" "host_cert" {
 }
 
 resource "libvirt_cloudinit_disk" "commoninit" {
-  name      = "init-${var.vm_name}.iso"
-  pool      = "default"
+  name = "init-${var.vm_name}.iso"
+  pool = "default"
 
   user_data = templatefile("${path.module}/templates/user-data.tftpl", {
-    hostname = var.vm_name
+    hostname         = var.vm_name
     host_private_key = tls_private_key.host_key.private_key_openssh
     host_certificate = data.local_file.host_cert.content
-    user_ca_pub      = file(var.user_ca_pub_path) 
+    user_ca_pub      = file(var.user_ca_pub_path)
   })
 
   network_config = templatefile("${path.module}/templates/network-config.tftpl", {
-    ip_address     = var.ip_address
-    gateway        = var.gateway
-    ext_ip         = var.ext_ip 
+    ip_address = var.ip_address
+    gateway    = var.gateway
+    ext_ip     = var.ext_ip
   })
 
   meta_data = jsonencode({
