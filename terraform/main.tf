@@ -54,8 +54,10 @@ module "kvm_instance" {
   ip_address = each.value.ip
   as_number  = lookup(each.value, "as_number", null)
 
-  wan    = lookup(each.value, "wan", false)
-  ext_ip = lookup(each.value, "ext_ip", null)
+  host_ca_key_path = var.host_ca_key_path
+  user_ca_pub_path = var.user_ca_pub_path
+  wan              = lookup(each.value, "wan", false)
+  ext_ip           = lookup(each.value, "ext_ip", null)
 
   network_id     = libvirt_network.k8s_net.id
   base_volume_id = libvirt_volume.ubuntu_base.id
