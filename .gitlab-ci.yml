@@ -154,7 +154,7 @@ ansible_run:
     - jq -r '.bastions.hosts.bastion.ansible_host' inventory.json > bastion_ip.txt
     - cat bastion_ip.txt
     - ssh-keyscan -H $(cat bastion_ip.txt) >> ~/.ssh/known_hosts
-    - jq -r '.. | .ansible_host? | select(. != null and . != "'$(cat bastion_ip.txt'")' inventory.json > internal_ips.txt
+    - jq -r '.. | .ansible_host? | select(. != null and . != "'$(cat bastion_ip.txt)'"' inventory.json > internal_ips.txt
     - cat internal_ips.txt
     - |
       for ip in $(cat internal_ips.txt); do
