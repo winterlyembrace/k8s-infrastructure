@@ -151,17 +151,14 @@ ansible_run:
     - eval $(ssh-agent -s)
     - cat "$SSH_PRIVATE_KEY" | ssh-add -
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - jq -r '.bastions.hosts.bastion.ansible_host' inventory.json > bastion_ip.txt
+    - cat bastion_ip.txt
+    - ssh-keyscan -H $(cat bastion_ip.txt) >> ~/.ssh/known_hosts
+    - jq -r '.. | .ansible_host? | select(. != null and . != "'$(cat bastion_ip.txt'")' inventory.json > internal_ips.txt
+    - cat internal_ips.txt
     - |
-      ls -l inventory.json
-      BASTION_IP=$(jq -r '.bastions.hosts.bastion.ansible_host' "${ANSIBLE_ROOT}"/inventory.json)
-      if [ -z "$BASTION_IP" ]; then echo "No Bastion IP"; exit 1; fi
-      
-      ssh-keyscan -H "$BASTION_IP" >> ~/.ssh/known_hosts
-      
-      INTERNAL_IPS=$(jq -r '.. | .ansible_host? | select(. != null and . != "'$BASTION_IP'")' inventory.json)
-      
-      for ip in $INTERNAL_IPS; do
-        ssh -o ProxyCommand="ssh -W %h:%p $BASTION_IP" -o StrictHostKeyChecking=no "$ip" /bin/true 2>/dev/null
+      for ip in $(cat internal_ips.txt); do
+        ssh -o ProxyCommand="ssh -W %h:%p egor@$(cat bastion_ip.txt)" -o StrictHostKeyChecking=no "egor@192.168.100.41" /bin/true
         ssh-keyscan -H "$ip" >> ~/.ssh/known_hosts
       done
     - chmod 644 ~/.ssh/known_hosts
