@@ -43,7 +43,7 @@ resource "libvirt_cloudinit_disk" "commoninit" {
     hostname         = var.vm_name
     host_private_key = tls_private_key.host_key.private_key_openssh
     host_certificate = data.local_file.host_cert.content
-    user_ca_pub      = file(var.user_ca_pub_path)
+    user_ca_pub      = trimspace(file(var.user_ca_pub_path))
   })
 
   network_config = templatefile("${path.module}/templates/network-config.tftpl", {
