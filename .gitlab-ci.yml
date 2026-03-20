@@ -32,8 +32,8 @@ variables:
   TF_HTTP_USERNAME: "gitlab-ci-token"
   TF_HTTP_PASSWORD: "${CI_JOB_TOKEN}"
   ANSIBLE_CONFIG: "${ANSIBLE_ROOT}/ansible.cfg"
-  TF_VAR_host_ca_key_path: $SSH_HOST_CA_KEY
-  TF_VAR_user_ca_pub_path: $SSH_USER_CA_PUB
+  TF_VAR_host_ca_key_path: ${SSH_HOST_CA_KEY}
+  TF_VAR_user_ca_pub_path: ${SSH_USER_CA_PUB}
 
 # --- Validation Jobs ---
 
