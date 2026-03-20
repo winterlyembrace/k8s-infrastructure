@@ -152,7 +152,8 @@ ansible_run:
     - cat "$SSH_PRIVATE_KEY" | ssh-add -
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
     - |
-      BASTION_IP=$(jq -r '.bastions.hosts.bastion.ansible_host // empty' inventory.json)
+      ls -l inventory.json
+      BASTION_IP=$(jq -r '.bastions.hosts.bastion.ansible_host' "${ANSIBLE_ROOT}"/inventory.json)
       if [ -z "$BASTION_IP" ]; then echo "No Bastion IP"; exit 1; fi
       
       ssh-keyscan -H "$BASTION_IP" >> ~/.ssh/known_hosts
