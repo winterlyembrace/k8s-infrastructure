@@ -158,8 +158,8 @@ ansible_run:
     - cat internal_ips.txt
     - |
       for ip in $(cat internal_ips.txt); do
-        ssh -o ProxyCommand="ssh -W %h:%p egor@$(cat bastion_ip.txt)" -o StrictHostKeyChecking=no "egor@192.168.100.41" /bin/true
-        ssh-keyscan -H "$ip" >> ~/.ssh/known_hosts
+        ssh -o ProxyCommand="ssh -W %h:%p egor@$(cat bastion_ip.txt)" egor@"$ip" /bin/true
+        ssh egor@$(cat bastion_ip.txt) "ssh-keyscan -H $ip" >> ~/.ssh/known_hosts
       done
     - chmod 644 ~/.ssh/known_hosts
     - ansible-playbook -i inventory.json site.yml -vvv
