@@ -9,19 +9,20 @@ resource "libvirt_volume" "vm_disk" {
   size           = var.disk_size * 1024 * 1024 * 1024
 }
 
+
 resource "libvirt_cloudinit_disk" "commoninit" {
-  name      = "init-${var.vm_name}.iso"
-  pool      = "default"
+  name = "init-${var.vm_name}.iso"
+  pool = "default"
 
   user_data = templatefile("${path.module}/templates/user-data.tftpl", {
-    hostname = var.vm_name
-    ssh_key  = var.ssh_key
+    hostname       = var.vm_name
+    authorized_key = var.ssh_key
   })
 
   network_config = templatefile("${path.module}/templates/network-config.tftpl", {
-    ip_address     = var.ip_address
-    gateway        = var.gateway
-    ext_ip         = var.ext_ip 
+    ip_address = var.ip_address
+    gateway    = var.gateway
+    ext_ip     = var.ext_ip
   })
 
   meta_data = jsonencode({
@@ -39,7 +40,6 @@ resource "libvirt_domain" "node" {
 
   network_interface {
     network_id = var.network_id
-#    addresses  = [var.ip_address]
   }
 
   dynamic "network_interface" {

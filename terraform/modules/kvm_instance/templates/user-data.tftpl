@@ -6,7 +6,8 @@ users:
     groups: [users, sudo]
     shell: /bin/bash
     ssh_authorized_keys:
-      - ${ssh_key}
+      - ${authorized_key}
+
 
 runcmd:
   %{ if hostname == "bastion" }
@@ -27,3 +28,4 @@ runcmd:
     }' > /etc/nftables.conf
   - systemctl enable --now nftables
   %{ endif }
+

@@ -1,9 +1,7 @@
-variable "ssh_public_key" {
-  description = "Public SSH key for user egor"
-  type        = string
-  sensitive   = true
+variable "ssh_key" {
+  type      = string
+  sensitive = true
 }
-
 
 
 variable "k8s_nodes" {
@@ -13,7 +11,7 @@ variable "k8s_nodes" {
     ram       = number
     ip        = string
     as_number = number
-    disk_size = optional (number, 10)
+    disk_size = optional(number, 10)
   }))
 }
 
@@ -22,13 +20,13 @@ variable "k8s_nodes" {
 variable "edge_nodes" {
   description = "Configuration for boundary nodes (ingress controllers, bastions, or load balancers) that handle external traffic and connectivity"
   type = map(object({
-    cpu       = number 
-    ram       = number 
+    cpu       = number
+    ram       = number
     ip        = string
     ext_ip    = string
     wan       = bool
     as_number = number
-    disk_size = optional (number, 10)
+    disk_size = optional(number, 10)
   }))
 }
 
@@ -41,7 +39,7 @@ variable "infra_nodes" {
     ram       = number
     ip        = string
     as_number = number
-    disk_size = optional (number, 10)
+    disk_size = optional(number, 10)
   }))
 }
 

@@ -12,14 +12,12 @@ stages:
 variables:
   # --- Tools versions ---
   TF_VER: "1.7.5"
-  ANSIBLE_VER: "v0.1"
   TFLINT_VER: "v0.50.3"
   CHECKOV_VER: "3.2.30"
   TFSEC_VER: "v1.28.5"
 
   # --- Full image paths ---
   TF_IMAGE: "hashicorp/terraform:${TF_VER}"
-  ANSIBLE_IMAGE: "winterlyembrace/ansible-ci:${ANSIBLE_VER}"
   TFLINT_IMAGE: "ghcr.io/terraform-linters/tflint:${TFLINT_VER}"
   CHECKOV_IMAGE: "bridgecrew/checkov:${CHECKOV_VER}"
   TFSEC_IMAGE: "aquasec/tfsec:${TFSEC_VER}"
@@ -32,6 +30,7 @@ variables:
   TF_HTTP_USERNAME: "gitlab-ci-token"
   TF_HTTP_PASSWORD: "${CI_JOB_TOKEN}"
   ANSIBLE_CONFIG: "${ANSIBLE_ROOT}/ansible.cfg"
+  TF_VAR_ssh_key: "${PUBLIC_SSH_KEY_PATH}"
 
 # --- Validation Jobs ---
 
@@ -45,6 +44,7 @@ terraform_validate:
   script:
     - cd "${TF_ROOT}"
     - terraform init -backend=false
+    - terraform fmt -check -recursive
     - terraform validate
 
 terraform_tflint:
@@ -79,14 +79,6 @@ terraform_checkov:
   script:
     - checkov -d "${TF_ROOT}" --framework terraform
 
-ansible_lint:
-  stage: validate
-  image: ${ANSIBLE_IMAGE}
-  tags:
-    - cluster-runner
-  script:
-    - cd "${ANSIBLE_ROOT}"
-    - ansible-lint site.yml
 
 terraform_plan:
   stage: plan
@@ -132,8 +124,10 @@ terraform_apply:
       -backend-config="retry_wait_min=5"
     - terraform apply -auto-approve tfplan
     - terraform output -json ansible_inventory > ${ANSIBLE_ROOT}/inventory.json
-    - cat ${ANSIBLE_ROOT}/inventory.json 
-  when: manual
+    - cat ${ANSIBLE_ROOT}/inventory.json
+  rules:    
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
   allow_failure: false  
   dependencies:
     - terraform_plan
@@ -141,27 +135,3 @@ terraform_apply:
     paths:
       - ${ANSIBLE_ROOT}/inventory.json
 
-ansible_run:
-  stage: provision
-  image: ${ANSIBLE_IMAGE}
-  tags:
-    - cluster-runner
-  script:
-    - cd "${ANSIBLE_ROOT}"
-    - eval $(ssh-agent -s)
-    - cat "$SSH_PRIVATE_KEY" | ssh-add -
-    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
-    - jq -r '.bastions.hosts.bastion.ansible_host' inventory.json > bastion_ip.txt
-    - cat bastion_ip.txt
-    - ssh-keyscan -H $(cat bastion_ip.txt) >> ~/.ssh/known_hosts
-    - jq -r '.. | .ansible_host? | select(. != null and . != "'$(cat bastion_ip.txt)'")' inventory.json > internal_ips.txt
-    - cat internal_ips.txt
-    - |
-      for ip in $(cat internal_ips.txt); do
-        ssh -o ProxyCommand="ssh -W %h:%p egor@$(cat bastion_ip.txt)" egor@"$ip" /bin/true
-        ssh egor@$(cat bastion_ip.txt) "ssh-keyscan -H $ip" >> ~/.ssh/known_hosts
-      done
-    - chmod 644 ~/.ssh/known_hosts
-    - ansible-playbook -i inventory.json site.yml -vvv
-  dependencies:
-    - terraform_apply
