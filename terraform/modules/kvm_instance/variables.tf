@@ -30,12 +30,10 @@ variable "disk_size" {
   default = 10
 }
 
-variable "host_ca_key_path" {
+variable "ssh_key" {
   type = string
+  sensitive = true
 }
 
-variable "user_ca_pub_path" {
-  type = string
-}
 
 

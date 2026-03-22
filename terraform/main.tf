@@ -54,8 +54,8 @@ module "kvm_instance" {
   ip_address = each.value.ip
   as_number  = lookup(each.value, "as_number", null)
 
-  host_ca_key_path = var.host_ca_key_path
-  user_ca_pub_path = var.user_ca_pub_path
+  
+  ssh_key          = var.ssh_key
   wan              = lookup(each.value, "wan", false)
   ext_ip           = lookup(each.value, "ext_ip", null)
 

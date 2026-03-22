@@ -1,0 +1,11 @@
+FROM cytopia/ansible:2.16-aws
+
+RUN apk add --no-cache jq \
+    && pip install --no-cache-dir \
+        ansible-lint==24.2.0 \
+        jmespath \
+        netaddr
+
+RUN ansible-galaxy collection install community.docker
+
+WORKDIR /ansible

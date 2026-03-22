@@ -1,10 +1,11 @@
 k8s_nodes = {
   "k8s-master" = {
     cpu       = 2,
-    ram       = 1536,
+    ram       = 2048,
     ip        = "192.168.100.10",
     as_number = 64512,
   }
+
   "worker-01" = {
     cpu       = 1,
     ram       = 1024,

@@ -5,34 +5,8 @@ users:
     sudo: ALL=(ALL) NOPASSWD:ALL
     groups: [users, sudo]
     shell: /bin/bash
-
-
-write_files:
-  # Node host key
-  - path: /etc/ssh/ssh_host_ed25519_key
-    permissions: '0600'
-    content: |
-      ${indent(6, host_private_key)}
-
-  # Node cert
-  - path: /etc/ssh/ssh_host_ed25519_key-cert.pub
-    permissions: '0644'
-    content: |
-      ${indent(6, host_certificate)}
-
-  # Trusted node user
-  - path: /etc/ssh/user_ca.pub
-    permissions: '0644'
-    content: |
-      ${indent(6, user_ca_pub)}
-
-  # SSHD configuration
-  - path: /etc/ssh/sshd_config.d/ca_auth.conf
-    permissions: '0644'
-    content: |
-      HostKey /etc/ssh/ssh_host_ed25519_key
-      HostCertificate /etc/ssh/ssh_host_ed25519_key-cert.pub
-      TrustedUserCAKeys /etc/ssh/user_ca.pub
+    ssh_authorized_keys:
+      - ${authorized_key}
 
 
 runcmd:
@@ -55,19 +29,3 @@ runcmd:
   - systemctl enable --now nftables
   %{ endif }
 
-  - |
-    MAX_RETRIES=20
-    COUNT=0
-    until sshd -t -f /etc/ssh/sshd_config || [ $COUNT -eq $MAX_RETRIES ]; do
-      echo "Waiting for SSH CA config to be valid... (Attempt $((COUNT+1))/$MAX_RETRIES)"
-      sleep 3
-      COUNT=$((COUNT+1))
-    done
-
-    if [ $COUNT -eq $MAX_RETRIES ]; then
-      echo "ERROR: SSH configuration failed validation after $MAX_RETRIES attempts."
-      exit 1
-    else
-      systemctl restart ssh
-      echo "SUCCESS: SSH CA applied and service restarted."
-    fi

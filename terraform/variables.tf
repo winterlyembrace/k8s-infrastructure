@@ -1,11 +1,7 @@
-variable "host_ca_key_path" {
-  type = string
+variable "ssh_key" {
+  type      = string
+  sensitive = true
 }
-
-variable "user_ca_pub_path" {
-  type = string
-}
-
 
 
 variable "k8s_nodes" {
