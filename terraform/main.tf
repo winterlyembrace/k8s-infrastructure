@@ -54,10 +54,10 @@ module "kvm_instance" {
   ip_address = each.value.ip
   as_number  = lookup(each.value, "as_number", null)
 
-  
-  ssh_key          = var.ssh_key
-  wan              = lookup(each.value, "wan", false)
-  ext_ip           = lookup(each.value, "ext_ip", null)
+
+  ssh_key = var.ssh_key
+  wan     = lookup(each.value, "wan", false)
+  ext_ip  = lookup(each.value, "ext_ip", null)
 
   network_id     = libvirt_network.k8s_net.id
   base_volume_id = libvirt_volume.ubuntu_base.id

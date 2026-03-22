@@ -31,7 +31,7 @@ variable "disk_size" {
 }
 
 variable "ssh_key" {
-  type = string
+  type      = string
   sensitive = true
 }
 
