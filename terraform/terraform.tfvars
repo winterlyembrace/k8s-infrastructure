@@ -8,7 +8,7 @@ k8s_nodes = {
 
   "worker-01" = {
     cpu       = 1,
-    ram       = 1024,
+    ram       = 2048,
     ip        = "192.168.100.20",
     as_number = 64513
   }
@@ -48,7 +48,7 @@ edge_nodes = {
 
   "lb-01" = {
     cpu    = 1,
-    ram    = 512,
+    ram    = 1024,
     ip     = "192.168.100.30",
     ext_ip = "192.168.122.253"
     wan    = true,
