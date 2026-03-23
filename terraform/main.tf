@@ -51,11 +51,11 @@ module "kvm_instance" {
   cpu        = each.value.cpu
   ram        = each.value.ram
   ip_address = each.value.ip
-  
-  user_name  = var.user_name
-  ssh_key    = var.ssh_key
-  wan        = lookup(each.value, "wan", false)
-  ext_ip     = lookup(each.value, "ext_ip", null)
+
+  user_name = var.user_name
+  ssh_key   = var.ssh_key
+  wan       = lookup(each.value, "wan", false)
+  ext_ip    = lookup(each.value, "ext_ip", null)
 
   network_id     = libvirt_network.k8s_net.id
   base_volume_id = libvirt_volume.ubuntu_base.id

@@ -1,5 +1,5 @@
 variable "user_name" {
-  type        = string
+  type = string
 }
 
 
