@@ -9,8 +9,106 @@
         timeout: 300
         connect_timeout: 5
 
-- name: Configure BGP Networking
-  hosts: all
-  become: true
-  roles:
-    - bird
+---
+# =======================================================
+# Step 1: 
+# =======================================================
+- name: Prepare all Kubernetes nodes
+  hosts: k8s_masters:k8s_workers
+  become: yes
+  tasks:
+    - name: Disable swap (Kubernetes requires this)
+      command: swapoff -a
+      warn: false
+
+    - name: Remove swap from /etc/fstab
+      replace:
+        path: /etc/fstab
+        regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+        replace: '# \1'
+
+    - name: Load containerd modules
+      modprobe:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - overlay
+        - br_netfilter
+
+    - name: Setup required sysctl params
+      sysctl:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+        state: present
+        reload: yes
+      loop:
+        - { name: 'net.bridge.bridge-nf-call-iptables', value: '1' }
+        - { name: 'net.bridge.bridge-nf-call-ip6tables', value: '1' }
+        - { name: 'net.ipv4.ip_forward', value: '1' }
+
+    - name: Install containerd and apt-transport-https
+      apt:
+        name: 
+          - containerd
+          - apt-transport-https
+          - curl
+        state: present
+        update_cache: yes
+
+    - name: Add Kubernetes apt key
+      apt_key:
+        url: https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key
+        state: present
+
+    - name: Add Kubernetes apt repository
+      apt_repository:
+        repo: deb https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /
+        state: present
+
+    - name: Install kubelet, kubeadm, kubectl
+      apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+      notify: restart kubelet
+
+  handlers:
+    - name: restart kubelet
+      systemd:
+        name: kubelet
+        state: restarted
+        enabled: yes
+
+# =======================================================
+# Step 2: 
+# =======================================================
+- name: Initialize Kubernetes Master
+  hosts: master-01
+  become: yes
+  tasks:
+    - name: Initialize the Kubernetes cluster using kubeadm
+      command: kubeadm init --pod-network-cidr=10.244.0.0/16
+      args:
+        creates: /etc/kubernetes/admin.conf
+
+    - name: Generate join command
+      command: kubeadm token create --print-join-command
+      register: join_command_raw
+
+    - name: Set join command as a fact (to use in the next play)
+      set_fact:
+        join_command: "{{ join_command_raw.stdout_lines[0] }}"
+
+# =======================================================
+# Step 3: 
+# =======================================================
+- name: Join Worker Nodes to Cluster
+  hosts: k8s_workers
+  become: yes
+  tasks:
+    - name: Join the cluster
+      command: "{{ hostvars['master-01']['join_command'] }}"
+      args:
+        creates: /etc/kubernetes/kubelet.conf
