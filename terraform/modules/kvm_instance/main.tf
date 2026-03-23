@@ -17,6 +17,7 @@ resource "libvirt_cloudinit_disk" "commoninit" {
   user_data = templatefile("${path.module}/templates/user-data.tftpl", {
     hostname       = var.vm_name
     authorized_key = var.ssh_key
+    ssh_user       = var.user_name
   })
 
   network_config = templatefile("${path.module}/templates/network-config.tftpl", {

@@ -4,14 +4,10 @@ variable "ram" { type = number }
 variable "ip_address" { type = string }
 variable "network_id" { type = string }
 variable "base_volume_id" { type = string }
+variable "user_name" { type = string }
 
 variable "gateway" {
   type    = string
-  default = null
-}
-
-variable "as_number" {
-  type    = number
   default = null
 }
 

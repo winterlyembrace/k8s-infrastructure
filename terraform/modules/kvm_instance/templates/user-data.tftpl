@@ -1,7 +1,7 @@
 #cloud-config
 
 users:
-  - name: egor
+  - name: ${ssh_user}
     sudo: ALL=(ALL) NOPASSWD:ALL
     groups: [users, sudo]
     shell: /bin/bash
@@ -10,7 +10,7 @@ users:
 
 
 runcmd:
-  %{ if hostname == "bastion" }
+  %{ if hostname == "jump-server" }
 
   # Enable routing for router node
   - sysctl -w net.ipv4.ip_forward=1
