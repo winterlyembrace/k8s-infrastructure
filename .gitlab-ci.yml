@@ -9,23 +9,13 @@ stages:
   - K8s Setup
 
 variables:
-  # --- Tools versions ---
+  # --- CI tools versions ---
   TF_VER: "1.7.5"
-  TFLINT_VER: "v0.50.3"
-  CHECKOV_VER: "3.2.30"
-  TFSEC_VER: "v1.28.5"
-  ANSIBLE_VER: "2.15.9"
-  ANSIBLE_LINT_VER: "24.2.0"
-  YAMLLINT_VER: "1.33.0"
-
+  NSIBLE_VER: "2.15.9"
+  
   # --- Full image paths ---
   TF_IMAGE: "hashicorp/terraform:${TF_VER}"
-  TFLINT_IMAGE: "ghcr.io/terraform-linters/tflint:${TFLINT_VER}"
-  CHECKOV_IMAGE: "bridgecrew/checkov:${CHECKOV_VER}"
-  TFSEC_IMAGE: "aquasec/tfsec:${TFSEC_VER}"
   ANSIBLE_IMAGE: "willhallonline/ansible:${ANSIBLE_VER}-ubuntu"
-  ANSIBLE_LINT_IMAGE: "ghcr.io/ansible/ansible-lint:v${ANSIBLE_LINT_VER}"
-  YAMLLINT_IMAGE: "cytopia/yamllint:${YAMLLINT_VER}"
 
   # --- Settings ---
   TF_ROOT: "${CI_PROJECT_DIR}/terraform"
