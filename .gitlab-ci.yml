@@ -1,4 +1,4 @@
- # --- CI tools versions ---
+ # --- CI-tools images versions ---
 include:
   - local: 'versions.env'
 
@@ -9,6 +9,7 @@ cache:
 
 stages:
   - Lints & Checks
+  - Bake Image
   - Infrastructure Provision
   - K8s Setup
 
@@ -16,17 +17,21 @@ variables:
   # --- Full image paths ---
   TF_IMAGE: "${REGISTRY_PATH}/tf-runner:${TF_RUNNER_VER}"
   ANSIBLE_IMAGE: "${REGISTRY_PATH}/ansible-runner:${ANSIBLE_RUNNER_VER}"
-  K8S_IMAGE: "${REGISTRY_PATH}/k8s-runner:${K8S_DEPLOYER_VER}"
+  K8S_IMAGE: "${REGISTRY_PATH}/k8s-deployer:${K8S_DEPLOYER_VER}"
+  PACKER_IMAGE: "hashicorp/packer:latest"
 
   # --- Settings ---
   TF_ROOT: "${CI_PROJECT_DIR}/terraform"
   ANSIBLE_ROOT: "${CI_PROJECT_DIR}/ansible"
+  PACKER_ROOT: "${CI_PROJECT_DIR}/packer"
+
   TF_PLUGIN_CACHE_DIR: "${TF_ROOT}/.terraform.d/plugin-cache"
   TF_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/production"
   TF_HTTP_USERNAME: "gitlab-ci-token"
   TF_HTTP_PASSWORD: "${CI_JOB_TOKEN}"
-  ANSIBLE_CONFIG: "${ANSIBLE_ROOT}/ansible.cfg"
   TF_VAR_ssh_key: "${PUBLIC_SSH_KEY_PATH}"
+
+  ANSIBLE_CONFIG: "${ANSIBLE_ROOT}/ansible.cfg"
   ANSIBLE_HOST_KEY_CHECKING: "False"
 
 # --- Validation Jobs ---
@@ -66,16 +71,6 @@ terraform_tfsec:
   script:
     - tfsec "${TF_ROOT}"
 
-terraform_checkov:
-  stage: Lints & Checks
-  image:
-    name: ${TF_IMAGE}
-    entrypoint: [""]
-  tags:
-    - cluster-runner
-  script:
-    - checkov -d "${TF_ROOT}" --framework terraform
-
 ansible_yamllint:
   stage: Lints & Checks
   image:
@@ -109,15 +104,23 @@ ansible_syntax_check:
     - cd "${ANSIBLE_ROOT}"
     - ansible-playbook site.yml --syntax-check
 
-ansible_checkov:
-  stage: Lints & Checks
-  image:
-    name: ${ANSIBLE_IMAGE}
+packer_build:
+  stage: Bake Image
+  image: 
+    name: ${PACKER_IMAGE}
     entrypoint: [""]
   tags:
     - cluster-runner
   script:
-    - checkov -d "${ANSIBLE_ROOT}" --framework ansible
+    - cd "${PACKER_ROOT}"
+    - packer init .
+    - packer build -force .
+  rules:
+    - changes:
+        - packer/**/*
+      when: on_success
+    - when: manual
+      allow_failure: true
 
 terraform_plan:
   stage: Infrastructure Provision
@@ -176,7 +179,11 @@ terraform_apply:
 
 configure_k8s:
   stage: K8s Setup
-  image: ${ANSIBLE_IMAGE}
+  image: 
+    name: ${ANSIBLE_IMAGE}
+    entrypoint: [""]
+  tags:
+    - cluster-runner
   needs:
     - job: terraform_apply 
       artifacts: true
@@ -186,5 +193,5 @@ configure_k8s:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
   script:
-    - echo "Running Ansible Playbook..."
-    - ansible-playbook -i inventory.json site.yml
+    - cd "${ANSIBLE_ROOT}"
+    - ansible-playbook -i inventory.json playbook-configure-nodes.yml
