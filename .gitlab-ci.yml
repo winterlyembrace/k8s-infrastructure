@@ -1,3 +1,7 @@
+ # --- CI tools versions ---
+include:
+  - local: 'versions.env'
+
 cache:
   key: terraform-plugins
   paths:
@@ -9,13 +13,10 @@ stages:
   - K8s Setup
 
 variables:
-  # --- CI tools versions ---
-  TF_VER: "1.7.5"
-  NSIBLE_VER: "2.15.9"
-  
   # --- Full image paths ---
-  TF_IMAGE: "hashicorp/terraform:${TF_VER}"
-  ANSIBLE_IMAGE: "willhallonline/ansible:${ANSIBLE_VER}-ubuntu"
+  TF_IMAGE: "${REGISTRY_PATH}/tf-runner:${TF_RUNNER_VER}"
+  ANSIBLE_IMAGE: "${REGISTRY_PATH}/ansible-runner:${ANSIBLE_RUNNER_VER}"
+  K8S_IMAGE: "${REGISTRY_PATH}/k8s-runner:${K8S_DEPLOYER_VER}"
 
   # --- Settings ---
   TF_ROOT: "${CI_PROJECT_DIR}/terraform"
@@ -46,7 +47,7 @@ terraform_validate:
 terraform_tflint:
   stage: Lints & Checks
   image:
-    name: ${TFLINT_IMAGE}
+    name: ${TF_IMAGE}
     entrypoint: [""]
   tags:
     - cluster-runner
@@ -58,7 +59,7 @@ terraform_tflint:
 terraform_tfsec:
   stage: Lints & Checks
   image:
-    name: ${TFSEC_IMAGE}
+    name: ${TF_IMAGE}
     entrypoint: [""]
   tags:
     - cluster-runner
@@ -68,7 +69,7 @@ terraform_tfsec:
 terraform_checkov:
   stage: Lints & Checks
   image:
-    name: ${CHECKOV_IMAGE}
+    name: ${TF_IMAGE}
     entrypoint: [""]
   tags:
     - cluster-runner
@@ -78,7 +79,7 @@ terraform_checkov:
 ansible_yamllint:
   stage: Lints & Checks
   image:
-    name: ${YAMLLINT_IMAGE}
+    name: ${ANSIBLE_IMAGE}
     entrypoint: [""]
   tags:
     - cluster-runner
@@ -88,7 +89,7 @@ ansible_yamllint:
 ansible_lint:
   stage: Lints & Checks
   image: 
-    name: ${ANSIBLE_LINT_IMAGE}
+    name: ${ANSIBLE_IMAGE}
     entrypoint: [""]
   tags:
     - cluster-runner
@@ -111,7 +112,7 @@ ansible_syntax_check:
 ansible_checkov:
   stage: Lints & Checks
   image:
-    name: ${CHECKOV_IMAGE}
+    name: ${ANSIBLE_IMAGE}
     entrypoint: [""]
   tags:
     - cluster-runner
@@ -175,7 +176,7 @@ terraform_apply:
 
 configure_k8s:
   stage: K8s Setup
-  image: willhallonline/ansible:latest 
+  image: ${ANSIBLE_IMAGE}
   needs:
     - job: terraform_apply 
       artifacts: true
