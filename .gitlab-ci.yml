@@ -151,6 +151,7 @@ terraform_apply:
       -backend-config="lock_method=POST"
       -backend-config="unlock_method=DELETE"
       -backend-config="retry_wait_min=5"
+    - ls -la
     - terraform apply -auto-approve tfplan
     - terraform output -json ansible_inventory > ${ANSIBLE_ROOT}/inventory.json
     - cat ${ANSIBLE_ROOT}/inventory.json
