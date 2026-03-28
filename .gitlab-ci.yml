@@ -188,7 +188,7 @@ configure_k8s:
     - echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - ssh-keyscan -H 192.168.122.252 >> ~/.ssh/known_hosts
+ #   - ssh-keyscan -H 192.168.122.252 >> ~/.ssh/known_hosts
     - cd "${ANSIBLE_ROOT}"
     - ansible-playbook -i inventory.json playbook-configure-nodes.yml
   rules:    
