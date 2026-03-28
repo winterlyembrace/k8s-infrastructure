@@ -8,6 +8,6 @@
   command: "{{ kubernetes_join_command }}"
   when: not kubelet_conf.stat.exists
   register: worker_join
-  failed_when: 
+  failed_when:
     - worker_join.rc != 0
     - "'already exists' not in worker_join.stderr"

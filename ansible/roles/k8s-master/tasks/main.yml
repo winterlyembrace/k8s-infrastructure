@@ -1,8 +1,8 @@
 ---
 - name: Initialize the Kubernetes cluster using kubeadm
   command: >
-    kubeadm init 
-    --pod-network-cidr={{ pod_network_cidr }} 
+    kubeadm init
+    --pod-network-cidr={{ pod_network_cidr }}
     --node-name {{ ansible_hostname }}
   args:
     creates: /etc/kubernetes/admin.conf
@@ -34,3 +34,4 @@
   delegate_to: "{{ item }}"
   delegate_facts: true
   loop: "{{ groups['k8s_workers'] }}"
+  
