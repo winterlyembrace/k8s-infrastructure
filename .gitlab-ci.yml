@@ -177,7 +177,7 @@ terraform_apply:
 configure_k8s:
   stage: K8s Setup
   image: 
-    name: ${ANSIBLE_IMAGE}
+    name: ${K8S_IMAGE}
     entrypoint: [""]
   tags:
     - cluster-runner
