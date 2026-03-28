@@ -20,6 +20,7 @@ variables:
   ANSIBLE_IMAGE: "${REGISTRY_PATH}/ansible-runner:aa7736bc"
   K8S_IMAGE: "${REGISTRY_PATH}/k8s-deployer:${K8S_DEPLOYER_VER}"
   PACKER_IMAGE: "winterlyembrace/k8s-packer:latest"
+  SSH_PRIVATE_KEY_PATH: "${SSH_PRIVATE_KEY}"
 
   # --- Settings ---
   TF_ROOT: "${CI_PROJECT_DIR}/terraform"
