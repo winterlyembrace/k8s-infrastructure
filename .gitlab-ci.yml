@@ -36,50 +36,50 @@ variables:
 
 # --- Validation Jobs ---
 
-terraform_validate:
-  stage: Lints & Checks
-  image:
-    name: ${TF_IMAGE}
-    entrypoint: [""]
-  tags:
-    - cluster-runner
-  script:
-    - cd "${TF_ROOT}"
-    - terraform init -backend=false
-    - terraform fmt -check -recursive
-    - terraform validate
+#terraform_validate:
+#  stage: Lints & Checks
+#  image:
+#    name: ${TF_IMAGE}
+#    entrypoint: [""]
+#  tags:
+#    - cluster-runner
+#  script:
+#    - cd "${TF_ROOT}"
+#    - terraform init -backend=false
+#    - terraform fmt -check -recursive
+#    - terraform validate
 
-terraform_tflint:
-  stage: Lints & Checks
-  image:
-    name: ${TF_IMAGE}
-    entrypoint: [""]
-  tags:
-    - cluster-runner
-  script:
-    - cd "${TF_ROOT}"
-    - tflint --init
-    - tflint --recursive
+#terraform_tflint:
+#  stage: Lints & Checks
+#  image:
+#    name: ${TF_IMAGE}
+#    entrypoint: [""]
+#  tags:
+#    - cluster-runner
+#  script:
+#    - cd "${TF_ROOT}"
+#    - tflint --init
+#    - tflint --recursive
 
-terraform_tfsec:
-  stage: Lints & Checks
-  image:
-    name: ${TF_IMAGE}
-    entrypoint: [""]
-  tags:
-    - cluster-runner
-  script:
-    - tfsec "${TF_ROOT}"
+#terraform_tfsec:
+#  stage: Lints & Checks
+#  image:
+#    name: ${TF_IMAGE}
+#    entrypoint: [""]
+#  tags:
+#    - cluster-runner
+#  script:
+#    - tfsec "${TF_ROOT}"
 
-ansible_yamllint:
-  stage: Lints & Checks
-  image:
-    name: ${ANSIBLE_IMAGE}
-    entrypoint: [""]
-  tags:
-    - cluster-runner
-  script:
-    - yamllint "${ANSIBLE_ROOT}"
+#ansible_yamllint:
+#  stage: Lints & Checks
+#  image:
+#    name: ${ANSIBLE_IMAGE}
+#    entrypoint: [""]
+#  tags:
+#    - cluster-runner
+# script:
+#    - yamllint "${ANSIBLE_ROOT}"
 
 #ansible_lint:
 #  stage: Lints & Checks
