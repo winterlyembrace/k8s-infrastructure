@@ -10,6 +10,7 @@ cache:
 stages:
   - Lints & Checks
   - Bake Image
+  - Terraform plan
   - Infrastructure Provision
   - K8s Setup
 
@@ -110,7 +111,7 @@ packer_build:
       when: on_success
 
 terraform_plan:
-  stage: Infrastructure Provision
+  stage: Terraform plan
   image:
     name: ${TF_IMAGE}
     entrypoint: [""]
