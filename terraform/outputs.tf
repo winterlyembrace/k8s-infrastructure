@@ -2,42 +2,38 @@ output "ansible_inventory" {
   value = {
     all = {
       vars = {
-        ansible_user = var.user_name
+        ansible_user = "ubuntu"
+        ansible_password = "ubuntu" 
       }
-    }
-
-    internal_network = {
       children = {
-        for group in ["k8s_masters", "k8s_workers", "jump_servers"] : group => {}
-      }
-      vars = {
-        ansible_ssh_common_args = "-o ProxyJump=egor@${module.kvm_instance["jump-server"].external_ip} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-      }
-    }
-
-    k8s_masters = {
-      hosts = {
-        for name, node in module.kvm_instance : name => {
-          ansible_host = node.internal_ip
+        internal_network = {
+          vars = {
+            ansible_ssh_common_args = "-o ProxyJump=ubuntu@${module.kvm_instance["jump-server"].external_ip} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          }
+          children = {
+            k8s_masters = {
+              hosts = {
+                for name, node in module.kvm_instance : name => {
+                  ansible_host = node.internal_ip
+                } if length(regexall("master", name)) > 0
+              }
+            }
+            k8s_workers = {
+              hosts = {
+                for name, node in module.kvm_instance : name => {
+                  ansible_host = node.internal_ip
+                } if length(regexall("worker", name)) > 0
+              }
+            }
+          }
         }
-        if length(regexall("master", name)) > 0
-      }
-    }
-
-    k8s_workers = {
-      hosts = {
-        for name, node in module.kvm_instance : name => {
-          ansible_host = node.internal_ip
-        }
-        if length(regexall("worker", name)) > 0
-      }
-    }
-
-    jump_servers = {
-      hosts = {
-        jump-server = {
-          ansible_host = try(module.kvm_instance["jump-server"].external_ip, null)
-          internal_ip  = try(module.kvm_instance["jump-server"].internal_ip, null)
+        jump_servers = {
+          hosts = {
+            jump-server = {
+              ansible_host = try(module.kvm_instance["jump-server"].external_ip, null)
+              ansible_ssh_common_args = "" 
+            }
+          }
         }
       }
     }
