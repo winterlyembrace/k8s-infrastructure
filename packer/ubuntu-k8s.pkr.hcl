@@ -12,10 +12,10 @@ packer {
 }
 
 source "qemu" "k8s_node" {
-  iso_url          = "${env("HOME")}/noble-server-cloudimg-amd64.img"
+  iso_url          = "../noble-server-cloudimg-amd64.img"
   iso_checksum     = "sha256:7aa6d9f5e8a3a55c7445b138d31a73d1187871211b2b7da9da2e1a6cbf169b21"
   disk_image       = true
-  output_directory = "/var/lib/libvirt/images"
+  output_directory = "./builds/k8s-ubuntu"
   vm_name          = "ubuntu-k8s.qcow2"
   disk_size        = "10G"
   format           = "qcow2"
