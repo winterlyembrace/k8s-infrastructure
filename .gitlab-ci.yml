@@ -91,18 +91,7 @@ ansible_lint:
   before_script:
     - cd "${ANSIBLE_ROOT}"
   script:
-    - ansible-lint site.yml
-
-ansible_syntax_check:
-  stage: Lints & Checks
-  image: 
-    name: ${ANSIBLE_IMAGE}
-    entrypoint: [""]
-  tags:
-    - cluster-runner
-  script:
-    - cd "${ANSIBLE_ROOT}"
-    - ansible-playbook site.yml --syntax-check
+    - ansible-lint
 
 packer_build:
   stage: Bake Image
