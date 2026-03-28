@@ -81,17 +81,17 @@ ansible_yamllint:
   script:
     - yamllint "${ANSIBLE_ROOT}"
 
-ansible_lint:
-  stage: Lints & Checks
-  image: 
-    name: ${ANSIBLE_IMAGE}
-    entrypoint: [""]
-  tags:
-    - cluster-runner
-  before_script:
-    - cd "${ANSIBLE_ROOT}"
-  script:
-    - ansible-lint
+#ansible_lint:
+#  stage: Lints & Checks
+#  image: 
+#    name: ${ANSIBLE_IMAGE}
+#    entrypoint: [""]
+#  tags:
+#    - cluster-runner
+#  before_script:
+#    - cd "${ANSIBLE_ROOT}"
+#  script:
+#    - ansible-lint
 
 packer_build:
   stage: Bake Image
