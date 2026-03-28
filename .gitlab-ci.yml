@@ -1,6 +1,6 @@
  # --- CI-tools images versions ---
 include:
-  - local: 'versions.env'
+  - local: "ci-tools-versions.yml"
 
 cache:
   key: terraform-plugins
