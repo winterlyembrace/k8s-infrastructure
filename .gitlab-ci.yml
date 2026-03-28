@@ -182,6 +182,7 @@ configure_k8s:
       artifacts: true
   before_script:
     - eval $(ssh-agent -s)
+    - export "$SSH_PRIVATE_KEY"
     - cat "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
