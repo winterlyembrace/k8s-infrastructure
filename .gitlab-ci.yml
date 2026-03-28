@@ -109,6 +109,8 @@ packer_build:
     - changes:
         - packer/**/*
       when: on_success
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: never
 
 terraform_plan:
   stage: Terraform plan
