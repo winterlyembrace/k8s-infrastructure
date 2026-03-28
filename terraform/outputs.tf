@@ -11,7 +11,7 @@ output "ansible_inventory" {
         for group in ["k8s_masters", "k8s_workers", "jump_servers"] : group => {}
       }
       vars = {
-        ansible_ssh_common_args = "-o ProxyJump=${var.user_name}@${module.kvm_instance["jump-server"].external_ip} -o StrictHostKeyChecking=no"
+        ansible_ssh_common_args = "-o ProxyJump=egor@${module.kvm_instance["jump-server"].external_ip} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
       }
     }
 
