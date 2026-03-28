@@ -176,7 +176,7 @@ terraform_apply:
 configure_k8s:
   stage: K8s Setup
   image: 
-    name: ${K8S_IMAGE}
+    name: ${ANSIBLE_IMAGE}
     entrypoint: [""]
   tags:
     - cluster-runner
@@ -184,8 +184,8 @@ configure_k8s:
  #   - job: terraform_apply 
  #     artifacts: true
   script:
-    - echo "$SSH_PRIVATE_KEY"
-    - chmod 600 "$SSH_PRIVATE_KEY"
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - ssh-keyscan -H 192.168.122.252 >> ~/.ssh/known_hosts
