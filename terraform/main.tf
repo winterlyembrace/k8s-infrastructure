@@ -23,7 +23,7 @@ provider "libvirt" {
 resource "libvirt_volume" "ubuntu_base" {
   name   = "ubuntu-k8s.qcow2"
   pool   = "default"
-  source = "../packer/builds/ubuntu-k8s.qcow2"
+  source = "/home/icyglocky/k8s-infrastructure/packer/builds/ubuntu-k8s.qcow2"
   format = "qcow2"
 }
 
