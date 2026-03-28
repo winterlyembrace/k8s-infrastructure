@@ -1,0 +1,14 @@
+#cloud-config
+ssh_pwauth: True
+disable_root: False
+chpasswd:
+  list: |
+     ubuntu:ubuntu
+  expire: False
+users:
+  - name: ubuntu
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: [users, admin, sudo]
+    shell: /bin/bash
+    lock_passwd: False
+    passwd: "$6$rounds=4096$X4E69uHn$uR8L88V/W.u8P8A9Vd8pLwQd/RzP/mNfW4I7d6O3.YV.4W7p1B5W8S1bY3d3"

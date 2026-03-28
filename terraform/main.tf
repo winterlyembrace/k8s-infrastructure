@@ -21,9 +21,9 @@ provider "libvirt" {
 
 
 resource "libvirt_volume" "ubuntu_base" {
-  name   = "noble-server-cloudimg-amd64.img"
+  name   = "ubuntu-k8s.qcow2"
   pool   = "default"
-  source = "/var/lib/libvirt/images/noble-server-cloudimg-amd64.img"
+  source = "/var/lib/libvirt/images/ubuntu-k8s.qcow2"
   format = "qcow2"
 }
 
