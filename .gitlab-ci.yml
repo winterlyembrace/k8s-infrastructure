@@ -183,8 +183,8 @@ configure_k8s:
       artifacts: true
   before_script:
     - eval $(ssh-agent -s)
-    - chmod 600 "$SSH_PRIVATE_KEY"
-    - ssh-add "$SSH_PRIVATE_KEY"
+    - chmod 600 "$SSH_PRIVATE_KEY_PATH"
+    - ssh-add "$SSH_PRIVATE_KEY_PATH"
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - ssh-keyscan -H 192.168.122.252 >> ~/.ssh/known_hosts
