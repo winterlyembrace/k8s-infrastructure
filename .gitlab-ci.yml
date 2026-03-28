@@ -186,8 +186,7 @@ configure_k8s:
  #     artifacts: true
   script:
     - eval $(ssh-agent -s)
-    - chmod 600 "$SSH_PRIVATE_KEY_PATH"
-    - ssh-add "$SSH_PRIVATE_KEY_PATH"
+    - echo "$SSH_PRIVATE_KEY_PATH" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - ssh-keyscan -H 192.168.122.252 >> ~/.ssh/known_hosts
