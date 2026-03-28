@@ -15,7 +15,7 @@ stages:
 
 variables:
   # --- Full image paths ---
-  TF_IMAGE: "${REGISTRY_PATH}/tf-runner:${TF_RUNNER_VER}"
+  TF_IMAGE: "hashicorp/terraform:1.7.5"
   ANSIBLE_IMAGE: "${REGISTRY_PATH}/ansible-runner:aa7736bc"
   K8S_IMAGE: "${REGISTRY_PATH}/k8s-deployer:${K8S_DEPLOYER_VER}"
   PACKER_IMAGE: "winterlyembrace/k8s-packer:latest"
@@ -108,8 +108,6 @@ packer_build:
     - changes:
         - packer/**/*
       when: on_success
-    - when: manual
-      allow_failure: true
 
 terraform_plan:
   stage: Infrastructure Provision
