@@ -195,3 +195,5 @@ configure_k8s:
   script:
     - cd "${ANSIBLE_ROOT}"
     - ansible-playbook -i inventory.json playbook-configure-nodes.yml
+  rules:    
+    - if: $CI_COMMIT_BRANCH == "main"
