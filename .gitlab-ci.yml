@@ -18,7 +18,7 @@ variables:
   TF_IMAGE: "${REGISTRY_PATH}/tf-runner:${TF_RUNNER_VER}"
   ANSIBLE_IMAGE: "${REGISTRY_PATH}/ansible-runner:${ANSIBLE_RUNNER_VER}"
   K8S_IMAGE: "${REGISTRY_PATH}/k8s-deployer:${K8S_DEPLOYER_VER}"
-  PACKER_IMAGE: "hashicorp/packer:latest"
+  PACKER_IMAGE: "winterlyembrace/k8s-packer:latest"
 
   # --- Settings ---
   TF_ROOT: "${CI_PROJECT_DIR}/terraform"
