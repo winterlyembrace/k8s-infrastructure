@@ -22,8 +22,6 @@ resource "libvirt_cloudinit_disk" "commoninit" {
 
   network_config = templatefile("${path.module}/templates/network-config.tftpl", {
     ip_address = var.ip_address
-    gateway    = var.gateway
-    ext_ip     = var.ext_ip
   })
 
   meta_data = jsonencode({
@@ -41,14 +39,6 @@ resource "libvirt_domain" "node" {
 
   network_interface {
     network_id = var.network_id
-  }
-
-  dynamic "network_interface" {
-    for_each = var.wan ? [1] : []
-    content {
-      network_name = "default"
-      addresses    = var.ext_ip != null ? [var.ext_ip] : null
-    }
   }
 
   disk {

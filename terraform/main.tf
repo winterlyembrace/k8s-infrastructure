@@ -46,7 +46,7 @@ resource "libvirt_network" "k8s_net" {
 
 module "kvm_instance" {
   source     = "./modules/kvm_instance"
-  for_each   = merge(var.k8s_nodes, var.edge_nodes)
+  for_each   = merge(var.k8s_nodes)
   vm_name    = each.key
   cpu        = each.value.cpu
   ram        = each.value.ram
@@ -54,11 +54,7 @@ module "kvm_instance" {
 
   user_name = var.user_name
   ssh_key   = var.ssh_key
-  wan       = lookup(each.value, "wan", false)
-  ext_ip    = lookup(each.value, "ext_ip", null)
 
   network_id     = libvirt_network.k8s_net.id
   base_volume_id = libvirt_volume.ubuntu_base.id
-
-  gateway = each.key == "jump-server" ? null : var.edge_nodes.jump-server.ip
 }

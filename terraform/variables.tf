@@ -21,16 +21,3 @@ variable "k8s_nodes" {
 }
 
 
-variable "edge_nodes" {
-  description = "Configuration for boundary nodes that handle external traffic and connectivity"
-  type = map(object({
-    cpu       = number
-    ram       = number
-    ip        = string
-    ext_ip    = string
-    wan       = bool
-    disk_size = optional(number, 10)
-  }))
-}
-
-
