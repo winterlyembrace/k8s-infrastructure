@@ -185,8 +185,7 @@ configure_k8s:
  #   - job: terraform_apply 
  #     artifacts: true
   script:
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY_PATH" | tr -d '\r' | ssh-add -
+    - echo "$SSH_PRIVATE_KEY_PATH"
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - ssh-keyscan -H 192.168.122.252 >> ~/.ssh/known_hosts
