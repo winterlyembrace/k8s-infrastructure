@@ -1,0 +1,6 @@
+---
+- name: Prepare Ubuntu Image
+  hosts: all
+  become: true
+  roles:
+    - k8s-base

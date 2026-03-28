@@ -1,0 +1,12 @@
+---
+- name: Configure Master Node
+  hosts: k8s_masters
+  become: true
+  roles:
+    - k8s-master
+
+- name: Configure Worker Nodes
+  hosts: k8s_workers
+  become: true
+  roles:
+    - k8s-worker
