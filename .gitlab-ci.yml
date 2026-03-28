@@ -134,7 +134,10 @@ terraform_plan:
     - terraform plan -out=tfplan
   artifacts:
     paths:
-      - "${TF_ROOT}/tfplan"
+      - "${TF_ROOT}/tfplan"      
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: never
 
 terraform_apply:
   stage: Infrastructure Provision
@@ -163,7 +166,7 @@ terraform_apply:
     - cat ${ANSIBLE_ROOT}/inventory.json
   rules:    
     - if: $CI_COMMIT_BRANCH == "main"
-      when: manual
+      when: never
   allow_failure: false  
   dependencies:
     - terraform_plan
