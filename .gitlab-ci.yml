@@ -181,9 +181,9 @@ configure_k8s:
     entrypoint: [""]
   tags:
     - cluster-runner
-  needs:
-    - job: terraform_apply 
-      artifacts: true
+ # needs:
+ #   - job: terraform_apply 
+ #     artifacts: true
   script:
     - eval $(ssh-agent -s)
     - chmod 600 "$SSH_PRIVATE_KEY_PATH"
