@@ -1,5 +1,7 @@
 # Local .terraform directories
 .terraform/
+noble-server-cloudimg-amd64.img
+packer/builds/
 
 # .tfstate files
 *.tfstate
