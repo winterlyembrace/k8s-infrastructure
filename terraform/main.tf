@@ -28,9 +28,9 @@ resource "libvirt_volume" "ubuntu_base" {
 }
 
 
-resource "libvirt_network" "k8s_net" {
-  name      = "k8s-isolated-net"
-  mode      = "nat"
+resource "libvirt_network" "def" {
+  name      = "default"
+  mode      = "open"
   autostart = true
   addresses = ["192.168.122.0/24"]
 
@@ -56,6 +56,5 @@ module "kvm_instance" {
   user_name = var.user_name
   ssh_key   = var.ssh_key
 
-  network_id     = libvirt_network.k8s_net.id
   base_volume_id = libvirt_volume.ubuntu_base.id
 }

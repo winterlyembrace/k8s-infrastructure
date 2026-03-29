@@ -37,10 +37,6 @@ resource "libvirt_domain" "node" {
 
   cloudinit = libvirt_cloudinit_disk.commoninit.id
 
-  network_interface {
-    network_id = var.network_id
-  }
-
   disk {
     volume_id = libvirt_volume.vm_disk.id
   }
