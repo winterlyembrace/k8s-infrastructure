@@ -2,6 +2,9 @@ variable "user_name" {
   type = string
 }
 
+variable "network_id" {
+  type = string 
+}
 
 variable "ssh_key" {
   description = "User's public SSH key"
