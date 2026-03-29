@@ -32,6 +32,7 @@ resource "libvirt_network" "k8s_net" {
   name      = "k8s-isolated-net"
   mode      = "nat"
   autostart = true
+  addresses = ["192.168.122.0/24"]
 
   dhcp {
     enabled = false
