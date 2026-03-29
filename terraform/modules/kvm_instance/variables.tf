@@ -6,24 +6,10 @@ variable "network_id" { type = string }
 variable "base_volume_id" { type = string }
 variable "user_name" { type = string }
 
-variable "gateway" {
-  type    = string
-  default = null
-}
-
-variable "wan" {
-  type    = bool
-  default = false
-}
-
-variable "ext_ip" {
-  type    = string
-  default = null
-}
 
 variable "disk_size" {
   type    = number
-  default = 10
+  default = 15
 }
 
 variable "ssh_key" {
