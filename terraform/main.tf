@@ -30,7 +30,7 @@ resource "libvirt_volume" "ubuntu_base" {
 
 resource "libvirt_network" "k8s_net" {
   name      = "k8s-isolated-net"
-  mode      = "none"
+  mode      = "nat"
   autostart = true
 
   dhcp {
