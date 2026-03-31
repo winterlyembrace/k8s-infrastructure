@@ -1,21 +1,24 @@
 output "ansible_inventory" {
+  description = "Ansible inventory in JSON format"
   value = {
     all = {
       vars = {
-        ansible_user = "egor"
+        ansible_user = var.user_name
       }
       children = {
-        k8s_masters = {
+        masters = {
           hosts = {
-            for name, node in module.kvm_instance : name => {
-              ansible_host = node.internal_ip
+            for name, config in local.k8s_nodes : name => {
+              ansible_host = config.external_ip
+              internal_ip  = config.internal_ip
             } if length(regexall("master", name)) > 0
           }
         }
-        k8s_workers = {
+        workers = {
           hosts = {
-            for name, node in module.kvm_instance : name => {
-              ansible_host = node.internal_ip
+            for name, config in local.k8s_nodes : name => {
+              ansible_host = config.external_ip
+              internal_ip  = config.internal_ip
             } if length(regexall("worker", name)) > 0
           }
         }
