@@ -15,13 +15,14 @@ resource "libvirt_cloudinit_disk" "commoninit" {
   pool = "default"
 
   user_data = templatefile("${path.module}/templates/user-data.tftpl", {
-    hostname       = var.vm_name
-    authorized_key = var.ssh_key
-    ssh_user       = var.user_name
+    wan            = var.wan
+    ssh_key        = var.ssh_key
+    user_name      = var.user_name
   })
 
   network_config = templatefile("${path.module}/templates/network-config.tftpl", {
-    ip_address = var.ip_address
+    int_ip = var.int_ip
+    ext_ip = var.ext_ip
   })
 
   meta_data = jsonencode({
@@ -36,6 +37,18 @@ resource "libvirt_domain" "node" {
   memory = var.ram
 
   cloudinit = libvirt_cloudinit_disk.commoninit.id
+
+  network_interface {
+    network_id = var.network_id
+  }
+
+  dynamic "network_interface" {
+    for_each = var.wan ? [1] : []
+    content {
+      network_name = "default"
+      addresses    = var.ext_ip != null ? [var.ext_ip] : null
+    }
+  }
 
   disk {
     volume_id = libvirt_volume.vm_disk.id
