@@ -3,7 +3,7 @@
 
 provider "registry.terraform.io/dmacvicar/libvirt" {
   version     = "0.8.1"
-  constraints = "0.8.1"
+  constraints = "0.8.1, ~> 0.8.1"
   hashes = [
     "h1:IKy4tvKIxwGjzvLwVp/gfm9Ce8Iegqx0u3tuPXlwYLM=",
     "zh:126b9c265f5c2c4faf9b6ea6abfd3f86639d6301ba99d11cb87caae65e91eca4",
@@ -24,7 +24,8 @@ provider "registry.terraform.io/dmacvicar/libvirt" {
 }
 
 provider "registry.terraform.io/hashicorp/local" {
-  version = "2.7.0"
+  version     = "2.7.0"
+  constraints = "~> 2.7.0"
   hashes = [
     "h1:2RYa3j7m/0WmET2fqotY4CHxE1Hpk0fgn47/126l+Og=",
     "zh:261fec71bca13e0a7812dc0d8ae9af2b4326b24d9b2e9beab3d2400fab5c5f9a",
