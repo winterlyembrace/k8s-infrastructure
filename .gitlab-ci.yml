@@ -9,17 +9,16 @@ cache:
 
 stages:
   - Lints & Checks
-  - Bake Image
   - Terraform plan
   - Infrastructure Provision
   - K8s Setup
+  - Bootstrap Apps
 
 variables:
   # --- Full image paths ---
   TF_IMAGE: "hashicorp/terraform:1.7.5"
   ANSIBLE_IMAGE: "${REGISTRY_PATH}/ansible-runner:aa7736bc"
   K8S_IMAGE: "${REGISTRY_PATH}/k8s-deployer:${K8S_DEPLOYER_VER}"
-  PACKER_IMAGE: "winterlyembrace/k8s-packer:latest"
 
   # --- Settings ---
   TF_ROOT: "${CI_PROJECT_DIR}/terraform"
@@ -93,26 +92,6 @@ variables:
 #    - cd "${ANSIBLE_ROOT}"
 #  script:
 #    - ansible-lint
-
-packer_build:
-  stage: Bake Image
-  image: 
-    name: ${PACKER_IMAGE}
-    entrypoint: [""]
-  tags:
-    - cluster-runner
-  script:
-    - cd "${PACKER_ROOT}"
-    - packer init .
-    - packer build -force .
-  rules:
-    - changes:
-        - packer/**/*
-      when: on_success
-    - if: $CI_PIPELINE_SOURCE == "web"
-      when: never
-    - if: $CI_COMMIT_BRANCH == "main"
-      when: never
 
 terraform_plan:
   stage: Terraform plan
@@ -199,7 +178,7 @@ configure_k8s:
     expire_in: 1 day
 
 deploy_infrastructure:
-  stage: Infrastructure Deploy
+  stage: Bootstrap Apps
   image: 
     name: alpine/helm:3.14.2
     entrypoint: [""]
