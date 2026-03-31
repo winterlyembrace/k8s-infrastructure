@@ -1,0 +1,60 @@
+---
+- name: Install HA stack and configure sysctl
+  block:
+    - name: Install haproxy and keepalived
+      ansible.builtin.apt:
+        name: [haproxy, keepalived]
+        state: present
+        update_cache: true
+
+    - name: Allow binding to non-local IP and enable IP forwarding
+      ansible.posix.sysctl:
+        name: "{{ item.key }}"
+        value: "{{ item.value }}"
+        state: present
+        reload: true
+      loop:
+        - { key: 'net.ipv4.ip_nonlocal_bind', value: '1' }
+        - { key: 'net.ipv4.ip_forward', value: '1' }
+
+- name: Deploy Keepalived configuration
+  ansible.builtin.template:
+    src: keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Keepalived
+
+- name: Deploy HAProxy configuration
+  ansible.builtin.template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart HAProxy
+
+- name: Force apply changes now
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure services are running and enabled
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - keepalived
+    - haproxy
+
+- name: Wait for Virtual IP to become reachable
+  ansible.builtin.wait_for:
+    host: "{{ cluster_vip }}"
+    port: "{{ item }}"
+    state: started
+    timeout: 60
+    delay: 5
+  delegate_to: localhost
+  become: false
+  run_once: true
+  loop: [22]

@@ -1,0 +1,33 @@
+global_defs {
+    router_id {{ ansible_hostname }}
+    script_user root
+    enable_script_security
+}
+
+
+vrrp_script check_haproxy {
+    script "killall -0 haproxy"
+    interval 2
+    weight 2
+}
+
+vrrp_instance VI_1 {
+    state BACKUP
+    interface {{ internal_interface }}
+    virtual_router_id {{ vrrp_router_id }}
+    priority {{ vrrp_priority }}
+    advert_int 1
+
+    authentication {
+        auth_type PASS
+        auth_pass {{ vrrp_password }}
+    }
+
+    virtual_ipaddress {
+        {{ cluster_vip }}
+    }
+
+    track_script {
+        check_haproxy
+    }
+}

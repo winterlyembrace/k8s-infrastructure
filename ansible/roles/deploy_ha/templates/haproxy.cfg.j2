@@ -1,0 +1,32 @@
+global
+    log /dev/log local0
+    log /dev/log local1 notice
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+
+defaults
+    log     global
+    mode    tcp
+    option  tcplog
+    option  dontlognull
+    timeout connect 5s
+    timeout client  50s
+    timeout server  50s
+
+frontend k8s-api
+    bind *:{{ k8s_api_public_port }}
+    mode tcp
+    option tcplog
+    default_backend k8s-masters
+
+backend k8s-masters
+    mode tcp
+    option tcp-check
+    balance roundrobin
+{% for host in groups['masters'] %}
+    server {{ host }} {{ hostvars[host]['ansible_host'] }}:{{ k8s_apiserver_bind_port }} check
+{% endfor %}
