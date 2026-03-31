@@ -1,0 +1,8 @@
+---
+- name: Configure Master Nodes
+  hosts: masters
+  become: true
+  roles:
+    - deploy_ha
+    - k8s_master
+
