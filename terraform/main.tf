@@ -57,8 +57,8 @@ locals {
         ram         = var.node_configs["worker"].ram
         disk_size   = var.node_configs["worker"].disk_size
         wan         = var.node_configs["worker"].wan
-        internal_ip = "192.168.100.${100 + i}"
-        external_ip = "192.168.122.${100 + i}"
+        internal_ip = "192.168.100.${20 + i}"
+        external_ip = "192.168.122.${20 + i}"
     }}
   )
 }
