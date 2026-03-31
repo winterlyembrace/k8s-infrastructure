@@ -17,7 +17,7 @@ stages:
 variables:
   # --- Full image paths ---
   TF_IMAGE: "hashicorp/terraform:1.7.5"
-  ANSIBLE_IMAGE: "${REGISTRY_PATH}/ansible-runner:aa7736bc"
+  ANSIBLE_IMAGE: "${REGISTRY_PATH}/ansible-runner:7a059d29"
   K8S_IMAGE: "${REGISTRY_PATH}/k8s-deployer:55ee5249"
 
   # --- Settings ---
@@ -163,7 +163,6 @@ configure_k8s:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - mkdir -p ~/.kube
-    - apk add --no-cache jq
   script:
     - cd "${ANSIBLE_ROOT}"
     - jq -r '.. | .ansible_host? // empty' inventory.json | xargs ssh-keyscan -H >> $HOME/.ssh/known_hosts
