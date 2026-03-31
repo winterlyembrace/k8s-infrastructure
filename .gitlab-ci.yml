@@ -163,8 +163,7 @@ configure_k8s:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - mkdir -p ~/.kube
-    - sudo apt-get update
-    - sudo apt-get install -y jq
+    - apk add --no-cache jq
   script:
     - cd "${ANSIBLE_ROOT}"
     - jq -r '.. | .ansible_host? // empty' inventory.json | xargs ssh-keyscan -H >> $HOME/.ssh/known_hosts
