@@ -18,7 +18,7 @@ variables:
   # --- Full image paths ---
   TF_IMAGE: "hashicorp/terraform:1.7.5"
   ANSIBLE_IMAGE: "${REGISTRY_PATH}/ansible-runner:aa7736bc"
-  K8S_IMAGE: "${REGISTRY_PATH}/k8s-deployer:${K8S_DEPLOYER_VER}"
+  K8S_IMAGE: "${REGISTRY_PATH}/k8s-deployer:55ee5249"
 
   # --- Settings ---
   TF_ROOT: "${CI_PROJECT_DIR}/terraform"
@@ -165,11 +165,12 @@ configure_k8s:
     - mkdir -p ~/.kube
   script:
     - cd "${ANSIBLE_ROOT}"
-    - jq -r '.. | .ansible_host? // empty' inventory.json | xargs ssh-keyscan -H >> ~/.ssh/known_hosts
+    - jq -r '.. | .ansible_host? // empty' inventory.json | xargs ssh-keyscan -H >> $HOME/.ssh/known_hosts
     - ansible-playbook -i inventory.json configure-nodes.yml
-    - sed -i "s|server: https://.*:6443|server: https://192.168.122.200:6443|g" k8s_admin.conf
-    - cp k8s_admin.conf ~/.kube/config
-    - chmod 600 ~/.kube/config
+    - export cluster_external_vip=$(grep '^cluster_external_vip:' "$ANSIBLE_ROOT/group_vars/all.yml" | awk '{print $2}' | tr -d '"')
+    - 'sed -i "s|server: https://.*:6443|server: https://${cluster_external_vip}:6443|g" k8s_admin.conf'
+    - cp k8s_admin.conf $HOME/.kube/config
+    - chmod 600 $HOME/.kube/config
   rules:    
     - if: $CI_COMMIT_BRANCH == "main"
   artifacts:
@@ -186,9 +187,11 @@ deploy_infrastructure:
     - job: configure_k8s
       artifacts: true
   script:
-    - mkdir -p ~/.kube
-    - cp "${ANSIBLE_ROOT}/k8s_admin.conf" ~/.kube/config
+    - mkdir -p $HOME/.kube
+    - cp "${ANSIBLE_ROOT}/k8s_admin.conf" $HOME/.kube/config
     - chmod 600 ~/.kube/config
-    - chown 1001:1001 ~/.kube/config
+    - ls -la $HOME/.kube/
+    - kubectl cluster-info
+    - ansible-playbook ${ANSIBLE_ROOT}/configure-network.yml
   
 
