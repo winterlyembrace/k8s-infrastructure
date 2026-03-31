@@ -5,10 +5,12 @@
   register: kubelet_conf
 
 - name: Join worker node to the cluster
-  ansible.builtin.command: "{{ kubernetes_join_command }}"
+  ansible.builtin.command: >
+    {{ hostvars[groups['masters'][0]]['worker_join_cmd_fact'] }}
+    --node-name {{ inventory_hostname }}
+    --apiserver-advertise-address={{ cluster_vip }}
   when: not kubelet_conf.stat.exists
   register: worker_join
-  changed_when: true
-  failed_when:
-    - worker_join.rc != 0
-    - "'already exists' not in worker_join.stderr"
+  changed_when: worker_join.rc == 0
+  args:
+    creates: /etc/kubernetes/kubelet.conf
