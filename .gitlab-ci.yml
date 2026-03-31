@@ -167,7 +167,7 @@ configure_k8s:
     - cd "${ANSIBLE_ROOT}"
     - jq -r '.. | .ansible_host? // empty' inventory.json | xargs ssh-keyscan -H >> ~/.ssh/known_hosts
     - ansible-playbook -i inventory.json configure-nodes.yml
-    - sed -i "s|server: https://.*:6443|server: https://${CLUSTER_VIP}:6443|g" k8s_admin.conf
+    - sed -i "s|server: https://.*:6443|server: https://192.168.122.200:6443|g" k8s_admin.conf
     - cp k8s_admin.conf ~/.kube/config
     - chmod 600 ~/.kube/config
   rules:    
