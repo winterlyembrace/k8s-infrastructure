@@ -1,0 +1,9 @@
+cluster_vip: "192.168.122.200"
+k8s_api_public_port: 6443
+k8s_apiserver_bind_port: 6444
+internal_interface: "ens4"
+vrrp_router_id: 51
+vrrp_password: "k8s_secure_pass"
+vrrp_priority: "100"
+pod_network_cidr: "10.244.0.0/16"
+metallb_ip_range: "192.168.122.210-192.168.122.250"
