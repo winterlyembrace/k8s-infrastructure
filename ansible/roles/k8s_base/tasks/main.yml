@@ -1,5 +1,4 @@
 ---
-# 1. Disable memory swap
 - name: Disable swap immediately
   ansible.builtin.command: swapoff -a
   when: ansible_swaptotal_mb > 0
@@ -11,7 +10,6 @@
     regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
     replace: '# \1'
 
-# 2. Kernel preparation
 - name: Create modules-load configuration
   ansible.builtin.copy:
     dest: /etc/modules-load.d/k8s.conf
@@ -34,27 +32,67 @@
     value: "{{ item.value }}"
     state: present
     reload: true
+    sysctl_file: /etc/sysctl.d/k8s.conf
   loop:
     - {key: 'net.bridge.bridge-nf-call-iptables', value: '1'}
     - {key: 'net.bridge.bridge-nf-call-ip6tables', value: '1'}
     - {key: 'net.ipv4.ip_forward', value: '1'}
 
-# 3. Add official Kubernetes repository (v1.29)
-- name: Install Apt Dependencies
+- name: Set additional sysctl parameters for HA networking
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "0"
+    state: present
+    reload: false
+    sysctl_file: /etc/sysctl.d/99-k8s-network.conf
+  loop:
+    - { key: 'net.ipv4.conf.all.send_redirects' }
+    - { key: 'net.ipv4.conf.default.send_redirects' }
+    - { key: 'net.ipv4.conf.ens4.send_redirects' }
+    - { key: 'net.ipv4.conf.ens3.send_redirects' }
+
+- name: Install Containerd
   ansible.builtin.apt:
-    name:
-      - apt-transport-https
-      - ca-certificates
-      - curl
-      - gnupg
+    name: containerd
     state: present
     update_cache: true
 
-- name: Create Directory For K8s Keyring
+- name: Create containerd config directory
   ansible.builtin.file:
-    path: /etc/apt/keyrings
+    path: /etc/containerd
     state: directory
     mode: '0755'
+
+- name: Get default containerd config
+  ansible.builtin.command: containerd config default
+  register: containerd_config_default
+  changed_when: false
+
+- name: Write containerd config to file
+  ansible.builtin.copy:
+    content: "{{ containerd_config_default.stdout }}"
+    dest: /etc/containerd/config.toml
+    mode: '0644'
+
+- name: Enable SystemdCgroup and set pause image
+  ansible.builtin.replace:
+    path: /etc/containerd/config.toml
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  loop:
+    - { regexp: 'SystemdCgroup = false', replace: 'SystemdCgroup = true' }
+    - { regexp: 'sandbox_image = "registry.k8s.io/pause:3.8"', replace: 'sandbox_image = "registry.k8s.io/pause:3.9"' }
+
+- name: Ensure containerd is running for image pull
+  ansible.builtin.systemd:
+    name: containerd
+    state: started
+    enabled: true
+
+- name: Install Apt Dependencies
+  ansible.builtin.apt:
+    name: [apt-transport-https, ca-certificates, curl, gnupg]
+    state: present
 
 - name: Download K8s GPG Key
   ansible.builtin.get_url:
@@ -62,22 +100,15 @@
     dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
     mode: '0644'
 
-- name: Add Kubernetes Repository To sources.list
+- name: Add Kubernetes Repository
   ansible.builtin.apt_repository:
-    repo: >-
-      deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.asc]
-      https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.asc] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /"
     state: present
     filename: kubernetes
 
-# 4. Final soft installation
-- name: Install Containerd And K8s Tools
+- name: Install K8s Tools
   ansible.builtin.apt:
-    name:
-      - containerd
-      - kubeadm
-      - kubelet
-      - kubectl
+    name: [kubeadm, kubelet, kubectl]
     state: present
     update_cache: true
 
@@ -85,7 +116,4 @@
   ansible.builtin.dpkg_selections:
     name: "{{ item }}"
     selection: hold
-  loop:
-    - kubelet
-    - kubeadm
-    - kubectl
+  loop: [kubelet, kubeadm, kubectl]
