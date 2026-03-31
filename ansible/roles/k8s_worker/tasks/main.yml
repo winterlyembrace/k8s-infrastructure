@@ -8,7 +8,7 @@
   ansible.builtin.command: >
     {{ hostvars[groups['masters'][0]]['worker_join_cmd_fact'] }}
     --node-name {{ inventory_hostname }}
-    --apiserver-advertise-address={{ cluster_vip }}
+    --apiserver-advertise-address={{ cluster_internal_vip }}
   when: not kubelet_conf.stat.exists
   register: worker_join
   changed_when: worker_join.rc == 0

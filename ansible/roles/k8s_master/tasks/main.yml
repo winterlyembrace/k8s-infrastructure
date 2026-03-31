@@ -7,8 +7,8 @@
 - name: Initialize first master
   ansible.builtin.command: >
     kubeadm init
-    --control-plane-endpoint "{{ cluster_vip }}:6443"
-    --apiserver-cert-extra-sans="{{ cluster_vip }},127.0.0.1,{{ inventory_hostname }}"
+    --control-plane-endpoint "{{ cluster_internal_vip }}:6443"
+    --apiserver-cert-extra-sans="{{ cluster_internal_vip }},{{ cluster_external_vip }},127.0.0.1,{{ inventory_hostname }}"
     --upload-certs
     --apiserver-advertise-address={{ internal_ip }}
     --apiserver-bind-port {{ k8s_apiserver_bind_port }}
