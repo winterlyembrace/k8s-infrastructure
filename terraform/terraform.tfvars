@@ -1,38 +1,21 @@
-
-
 user_name = "egor"
 
+master_count = 3
 
-k8s_nodes = {
-  "master-01" = {
-    cpu = 2,
-    ram = 2048,
-    ip  = "192.168.122.10"
+worker_count = 2
+
+node_configs = {
+  "master" = {
+    cpu = 4
+    ram = 2048
+    disk_size = 15
+    wan = true
   }
 
-  "master-02" = {
-    cpu = 2,
-    ram = 2048,
-    ip  = "192.168.122.11"
-  }
-
-  "master-03" = {
-    cpu = 2,
-    ram = 2048,
-    ip  = "192.168.122.12"
-  }
-
-  "worker-01" = {
-    cpu = 1,
-    ram = 2048,
-    ip  = "192.168.122.20"
-  }
-
-  "worker-02" = {
-    cpu = 2,
-    ram = 2048,
-    ip  = "192.168.122.21"
+  "worker" = {
+    cpu = 4
+    ram = 2048
+    disk_size = 15
+    wan = true
   }
 }
-
-
