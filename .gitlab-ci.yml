@@ -180,7 +180,7 @@ configure_k8s:
 deploy_infrastructure:
   stage: Bootstrap Apps
   image: 
-    name: alpine/helm:3.14.2
+    name: ${K8S_IMAGE}
     entrypoint: [""]
   needs:
     - job: configure_k8s
@@ -189,6 +189,6 @@ deploy_infrastructure:
     - mkdir -p ~/.kube
     - cp "${ANSIBLE_ROOT}/k8s_admin.conf" ~/.kube/config
     - chmod 600 ~/.kube/config
-    - chmod +x scripts/deploy-k8s-infra.sh
-    - ./scripts/deploy-k8s-infra.sh
+    - chown 1001:1001 ~/.kube/config
+  
 
