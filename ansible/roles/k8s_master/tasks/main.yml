@@ -1,36 +1,46 @@
 ---
-- name: Initialize the Kubernetes cluster using kubeadm
+- name: Pre-pull Kubernetes images for fast init
+  ansible.builtin.command:
+    cmd: kubeadm config images pull --kubernetes-version v1.29.15
+  changed_when: true
+
+- name: Initialize first master
   ansible.builtin.command: >
     kubeadm init
+    --control-plane-endpoint "{{ cluster_vip }}:6443"
+    --apiserver-cert-extra-sans="{{ cluster_vip }},127.0.0.1,{{ inventory_hostname }}"
+    --upload-certs
+    --apiserver-advertise-address={{ internal_ip }}
+    --apiserver-bind-port {{ k8s_apiserver_bind_port }}
     --pod-network-cidr={{ pod_network_cidr }}
-    --node-name {{ ansible_hostname }}
+    --node-name {{ inventory_hostname }}
+  register: kubeadm_init_raw
+  when: inventory_hostname == groups['masters'][0]
   args:
     creates: /etc/kubernetes/admin.conf
-  register: kubeadm_init
 
-- name: Create .kube directory for ubuntu user
-  ansible.builtin.file:
-    path: "/home/{{ ansible_user }}/.kube"
-    state: directory
-    mode: '0755'
+- name: Setup kubeconfig and fetch to local machine
+  block:
+    - name: Create .kube directory for root
+      ansible.builtin.file:
+        path: "/home/{{ ansible_user }}/.kube"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0700'
 
-- name: Copy admin.conf to user's kube config
-  ansible.builtin.copy:
-    src: /etc/kubernetes/admin.conf
-    dest: "/home/{{ ansible_user }}/.kube/config"
-    remote_src: true
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: '0600'
+    - name: Copy admin.conf to local kubeconfig
+      ansible.builtin.copy:
+        src: /etc/kubernetes/admin.conf
+        dest: "/home/{{ ansible_user }}/.kube/config"
+        remote_src: true
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
 
-- name: Generate join command for workers
-  ansible.builtin.command: kubeadm token create --print-join-command
-  register: join_command_raw
-  changed_when: false
-
-- name: Set join command as a global fact
-  ansible.builtin.set_fact:
-    kubernetes_join_command: "{{ join_command_raw.stdout }}"
-  delegate_to: "{{ item }}"
-  delegate_facts: true
-  loop: "{{ groups['k8s_workers'] }}"
+    - name: Fetch kubeconfig to local machine
+      ansible.builtin.fetch:
+        src: /etc/kubernetes/admin.conf
+        dest: "./k8s_admin.conf"
+        flat: true
+      when: inventory_hostname == groups['masters'][0]
