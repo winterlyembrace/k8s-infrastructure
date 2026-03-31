@@ -8,14 +8,21 @@ variable "ssh_key" {
   sensitive   = true
 }
 
-variable "k8s_nodes" {
-  description = "Configuration for Kubernetes cluster nodes, including both control-plane and worker roles"
+variable "master_count" { type = number }
+variable "worker_count" { type = number }
+
+variable "node_configs" {
   type = map(object({
     cpu       = number
     ram       = number
-    ip        = string
-    disk_size = optional(number, 10)
+    disk_size = number
+    wan       = bool
   }))
+  default = {
+    "master" = { cpu = 2, ram = 1536, disk_size = 15, wan = true }
+    "worker" = { cpu = 2, ram = 2048, disk_size = 15, wan = true }
+  }
 }
+
 
 
