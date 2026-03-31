@@ -49,12 +49,10 @@
 
 - name: Wait for Virtual IP to become reachable
   ansible.builtin.wait_for:
-    host: "{{ cluster_vip }}"
-    port: "{{ item }}"
-    state: started
+    host: "{{ cluster_internal_vip }}"
+    port: 22
     timeout: 60
     delay: 5
-  delegate_to: localhost
-  become: false
+  delegate_to: "{{ groups['workers'][0] }}"
   run_once: true
-  loop: [22]
+
