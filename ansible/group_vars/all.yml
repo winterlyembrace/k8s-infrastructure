@@ -1,8 +1,11 @@
-cluster_vip: "192.168.122.200"
+cluster_external_vip: "192.168.122.200"
+cluster_internal_vip: "192.168.100.200"
 k8s_api_public_port: 6443
 k8s_apiserver_bind_port: 6444
-internal_interface: "ens4"
-vrrp_router_id: 51
+internal_interface: "ens3"
+external_interface: "ens4"
+vrrp_external_router_id: 51
+vrrp_internal_router_id: 52
 vrrp_password: "k8s_secure_pass"
 vrrp_priority: "100"
 pod_network_cidr: "10.244.0.0/16"
