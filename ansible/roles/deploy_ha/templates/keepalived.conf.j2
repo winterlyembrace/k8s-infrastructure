@@ -11,10 +11,10 @@ vrrp_script check_haproxy {
     weight 2
 }
 
-vrrp_instance VI_1 {
+vrrp_instance VI_EXT {
     state BACKUP
-    interface {{ internal_interface }}
-    virtual_router_id {{ vrrp_router_id }}
+    interface {{ external_interface }}
+    virtual_router_id {{ vrrp_external_router_id }}
     priority {{ vrrp_priority }}
     advert_int 1
 
@@ -24,7 +24,28 @@ vrrp_instance VI_1 {
     }
 
     virtual_ipaddress {
-        {{ cluster_vip }}
+        {{ cluster_external_vip }}
+    }
+
+    track_script {
+        check_haproxy
+    }
+}
+
+vrrp_instance VI_INT {
+    state BACKUP
+    interface {{ internal_interface }}          
+    virtual_router_id {{ vrrp_internal_router_id }}
+    priority {{ vrrp_priority }}
+    advert_int 1
+
+    authentication {
+        auth_type PASS
+        auth_pass {{ vrrp_password }}
+    }
+
+    virtual_ipaddress {
+        {{ cluster_internal_vip }}    
     }
 
     track_script {

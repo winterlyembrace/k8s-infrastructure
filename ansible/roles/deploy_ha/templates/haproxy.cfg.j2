@@ -28,5 +28,5 @@ backend k8s-masters
     option tcp-check
     balance roundrobin
 {% for host in groups['masters'] %}
-    server {{ host }} {{ hostvars[host]['ansible_host'] }}:{{ k8s_apiserver_bind_port }} check
+    server {{ host }} {{ hostvars[host]['internal_ip'] }}:{{ k8s_apiserver_bind_port }} check
 {% endfor %}
