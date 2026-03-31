@@ -1,12 +1,26 @@
 #cloud-config
 
 users:
-  - name: ${ssh_user}
+  - name: ${user_name}
     sudo: ALL=(ALL) NOPASSWD:ALL
     groups: [users, sudo]
     shell: /bin/bash
     ssh_authorized_keys:
-      - ${authorized_key}
+      - ${ssh_key}
 
 
+runcmd:
+%{ if wan == true ~}
+  # Enable NAT
+  - |
+    echo '#!/usr/sbin/nft -f
+    flush ruleset
+    table ip nat {
+      chain postrouting {
+        type nat hook postrouting priority 100; policy accept;
+        oifname "ens4" masquerade
+      }
+    }' > /etc/nftables.conf
+  - systemctl enable --now nftables
+%{ endif ~}
 
