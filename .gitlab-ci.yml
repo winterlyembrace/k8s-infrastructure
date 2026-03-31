@@ -183,8 +183,33 @@ configure_k8s:
     - echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
+    - mkdir -p ~/.kube
   script:
     - cd "${ANSIBLE_ROOT}"
-    - ansible-playbook -i inventory.json playbook-configure-nodes.yml
+    - jq -r '.. | .ansible_host? // empty' inventory.json | xargs ssh-keyscan -H >> ~/.ssh/known_hosts
+    - ansible-playbook -i inventory.json configure-nodes.yml
+    - sed -i "s|server: https://.*:6443|server: https://${CLUSTER_VIP}:6443|g" k8s_admin.conf
+    - cp k8s_admin.conf ~/.kube/config
+    - chmod 600 ~/.kube/config
   rules:    
     - if: $CI_COMMIT_BRANCH == "main"
+  artifacts:
+    paths:
+      - "${ANSIBLE_ROOT}/k8s_admin.conf"
+    expire_in: 1 day
+
+deploy_infrastructure:
+  stage: Infrastructure Deploy
+  image: 
+    name: alpine/helm:3.14.2
+    entrypoint: [""]
+  needs:
+    - job: configure_k8s
+      artifacts: true
+  script:
+    - mkdir -p ~/.kube
+    - cp "${ANSIBLE_ROOT}/k8s_admin.conf" ~/.kube/config
+    - chmod 600 ~/.kube/config
+    - chmod +x scripts/deploy-k8s-infra.sh
+    - ./scripts/deploy-k8s-infra.sh
+
