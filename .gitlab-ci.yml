@@ -194,6 +194,9 @@ deploy_infrastructure:
     - chmod 600 ~/.kube/config
     - ls -la $HOME/.kube/
     - kubectl cluster-info
-    - ansible-playbook -i ${ANSIBLE_ROOT}/inventory.json ${ANSIBLE_ROOT}/configure-network.yml
+    - cd "${ANSIBLE_ROOT}"
+    - ls -la
+    - jq -r '.. | .ansible_host? // empty' inventory.json | xargs ssh-keyscan -H >> $HOME/.ssh/known_hosts
+    - ansible-playbook -i inventory.json configure-network.yml
   
 
