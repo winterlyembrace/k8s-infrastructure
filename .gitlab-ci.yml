@@ -176,6 +176,7 @@ configure_k8s:
   artifacts:
     paths:
       - "${ANSIBLE_ROOT}/k8s_admin.conf"
+      - "${ANSIBLE_ROOT}/inventory.json"
     expire_in: 1 day
 
 deploy_infrastructure:
