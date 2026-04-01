@@ -5,7 +5,6 @@
   roles:
     - deploy_ha
     - k8s_master
-    - join_masters
 
 - name: Configure Worker Nodes
   hosts: workers
