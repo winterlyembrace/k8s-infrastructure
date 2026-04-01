@@ -2,6 +2,5 @@
 - name: Configure Network
   hosts: localhost
   connection: local
-  become: true
   roles:
     - configure_network

@@ -188,20 +188,12 @@ deploy_infrastructure:
       artifacts: true
     - job: configure_k8s
       artifacts: true
-  before_script:
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY_BASE64" | base64 -d | ssh-add -
-    - mkdir -p $HOME/.ssh
-    - chmod 700 $HOME/.ssh
-    - mkdir -p $HOME/.kube
   script:
     - mkdir -p $HOME/.kube
     - cp "${ANSIBLE_ROOT}/k8s_admin.conf" $HOME/.kube/config
     - chmod 600 $HOME/.kube/config
-    - ls -la $HOME/.kube/
     - kubectl cluster-info
     - cd "${ANSIBLE_ROOT}"
-    - jq -r '.. | .ansible_host? // empty' inventory.json | xargs ssh-keyscan -H >> $HOME/.ssh/known_hosts
     - ansible-playbook -i inventory.json configure-network.yml
   
 
