@@ -65,7 +65,7 @@
         src: /etc/kubernetes/admin.conf
         dest: "./k8s_admin.conf"
         flat: true
-      when: k8s_init.stat.exists
+      when: inventory_hostname == first_available_master
       run_once: true
 
     - name: Copy admin.conf from CI runner to all masters
