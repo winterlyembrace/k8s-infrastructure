@@ -176,7 +176,6 @@ configure_k8s:
   artifacts:
     paths:
       - "${ANSIBLE_ROOT}/k8s_admin.conf"
-      - "${ANSIBLE_ROOT}/inventory.json"
     expire_in: 1 day
 
 deploy_infrastructure:
@@ -195,6 +194,6 @@ deploy_infrastructure:
     - chmod 600 ~/.kube/config
     - ls -la $HOME/.kube/
     - kubectl cluster-info
-    - ansible-playbook ${ANSIBLE_ROOT}/configure-network.yml
+    - ansible-playbook -i ${ANSIBLE_ROOT}/inventory.json ${ANSIBLE_ROOT}/configure-network.yml
   
 
