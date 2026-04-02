@@ -185,8 +185,6 @@ deploy_infrastructure:
     name: ${K8S_IMAGE}
     entrypoint: [""]
   needs:
-    - job: terraform_apply
-      artifacts: true
     - job: configure_k8s
       artifacts: true
   script:
@@ -195,6 +193,6 @@ deploy_infrastructure:
     - chmod 600 $HOME/.kube/config
     - kubectl cluster-info
     - cd "${ANSIBLE_ROOT}"
-    - ansible-playbook -i inventory.json configure-network.yml
+    - ansible-playbook configure-network.yml
   
 

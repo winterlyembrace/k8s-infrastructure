@@ -1,46 +1,17 @@
 ---
-- name: Add Calico Helm repo
-  kubernetes.core.helm_repository:
-    name: projectcalico
-    repo_url: "https://docs.tigera.io/calico/charts"
-  delegate_to: localhost
-
-- name: Install Calico via Helm
-  kubernetes.core.helm:
-    name: calico
-    chart_ref: projectcalico/tigera-operator
-    release_namespace: tigera-operator
-    create_namespace: true
-    update_repo_cache: true
-    wait: true
-  delegate_to: localhost
-
-- name: Wait for Tigera Operator CRDs to be ready
-  kubernetes.core.k8s_info:
-    api_version: apiextensions.k8s.io/v1
-    kind: CustomResourceDefinition
-    name: installations.operator.tigera.io
-  register: crd_status
-  until: crd_status.resources | length > 0
-  retries: 10
-  delay: 5
-  delegate_to: localhost
-
-- name: Apply Calico Installation Custom Resource
+- name: Apply Calico manifest directly from GitHub
   kubernetes.core.k8s:
     state: present
-    definition:
-      apiVersion: operator.tigera.io/v1
-      kind: Installation
-      metadata:
-        name: default
-      spec:
-        calicoNetwork:
-          ipPools:
-            - blockSize: 26
-              cidr: 10.244.0.0/16
-              encapsulation: VXLAN
-              natOutgoing: Enabled
-              nodeSelector: all()
+    src: "https://raw.githubusercontent.com/winterlyembrace/k8s-gitops-config/refs/heads/main/calico/calico.yaml"
   delegate_to: localhost
 
+- name: Install Argo CD via Helm
+  kubernetes.core.helm:
+    name: argocd
+    chart_ref: argo/argo-cd
+    release_namespace: argocd
+    create_namespace: true
+    values:
+      server:
+        service:
+          type: NodePort
