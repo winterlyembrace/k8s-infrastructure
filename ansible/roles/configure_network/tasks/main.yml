@@ -5,6 +5,11 @@
     src: "https://raw.githubusercontent.com/winterlyembrace/k8s-gitops-config/refs/heads/main/calico/calico.yaml"
   delegate_to: localhost
 
+- name: Add Argo CD Helm repository
+  kubernetes.core.helm_repository:
+    name: argo
+    repo_url: "https://argoproj.github.io/argo-cd"
+
 - name: Install Argo CD via Helm
   kubernetes.core.helm:
     name: argocd
