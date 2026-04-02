@@ -14,7 +14,7 @@
 - name: Add Argo CD Helm repository
   kubernetes.core.helm_repository:
     name: argo
-    repo_url: "https://argoproj.github.io/argo-cd"
+    repo_url: "https://argoproj.github.io/argo-charts"
 
 - name: Install Argo CD via Helm
   kubernetes.core.helm:
