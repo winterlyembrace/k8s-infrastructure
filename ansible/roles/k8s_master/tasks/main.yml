@@ -33,16 +33,18 @@
     all_masters_empty: "{{ groups['masters'] | map('extract', hostvars, ['k8s_joined', 'stat', 'exists']) | select('true') | list | length == 0 }}"
   run_once: true
 
+- name: Create kubeadm init configuration from template
+  ansible.builtin.template:
+    src: kubeadm-init.yaml.j2
+    dest: /etc/kubernetes/kubeadm-init.yaml
+    mode: '0644'
+  when: inventory_hostname == first_available_master
+
 - name: Initialize first master
   ansible.builtin.command: >
     kubeadm init
-    --control-plane-endpoint "{{ cluster_internal_vip }}:6443"
-    --apiserver-cert-extra-sans="{{ cluster_internal_vip }},{{ cluster_external_vip }},127.0.0.1,{{ inventory_hostname }}"
+    --config /etc/kubernetes/kubeadm-init.yaml
     --upload-certs
-    --apiserver-advertise-address={{ internal_ip }}
-    --apiserver-bind-port {{ k8s_apiserver_bind_port }}
-    --pod-network-cidr={{ pod_network_cidr }}
-    --node-name {{ inventory_hostname }}
   register: kubeadm_init_raw
   when:
     - inventory_hostname == first_available_master
