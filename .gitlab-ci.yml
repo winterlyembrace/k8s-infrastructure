@@ -12,7 +12,7 @@ stages:
   - Terraform plan
   - Infrastructure Provision
   - K8s Setup
-  - Bootstrap Apps
+  - Deploy CNI to Cluster
 
 variables:
   # --- Full image paths ---
@@ -110,6 +110,7 @@ terraform_plan:
       -backend-config="lock_method=POST"
       -backend-config="unlock_method=DELETE"
       -backend-config="retry_wait_min=5"
+    - terraform destroy -auto-approve
     - terraform plan -out=tfplan
   artifacts:
     paths:
@@ -178,8 +179,8 @@ configure_k8s:
       - "${ANSIBLE_ROOT}/k8s_admin.conf"
     expire_in: 1 day
 
-deploy_infrastructure:
-  stage: Bootstrap Apps
+configure_network:
+  stage: Deploy CNI to Cluster
   image: 
     name: ${K8S_IMAGE}
     entrypoint: [""]
@@ -193,5 +194,7 @@ deploy_infrastructure:
     - kubectl cluster-info
     - cd "${ANSIBLE_ROOT}"
     - ansible-playbook configure-network.yml
+  rules:    
+    - if: $CI_COMMIT_BRANCH == "main"
   
 

@@ -1,0 +1,47 @@
+---
+- name: Add Cilium Helm repo
+  kubernetes.core.helm_repository:
+    name: cilium
+    repo_url: "https://helm.cilium.io/"
+
+- name: Install Cilium CNI via Helm
+  kubernetes.core.helm:
+    name: cilium
+    chart_ref: cilium/cilium
+    chart_version: "{{ cilium_version }}"
+    release_namespace: kube-system
+    create_namespace: true
+    wait: true
+    values:
+      kubeProxyReplacement: "strict"
+      k8sServiceHost: "{{ cluster_internal_vip }}"
+      k8sServicePort: "{{ k8s_api_public_port }}"
+      
+      hubble:
+        enabled: true
+        ui:
+          enabled: true
+        relay:
+          enabled: true
+        metrics:
+          enabled:
+            - dns
+            - drop
+            - tcp
+            - icmp
+            - http
+            
+      ipam:
+        mode: "kubernetes"
+        
+      operator:
+        prometheus:
+          enabled: true
+        replicas: 1
+
+- name: Wait for all nodes to be Ready
+  ansible.builtin.command:
+    cmd: "kubectl wait --for=condition=Ready nodes --all --timeout=300s"
+  delegate_to: localhost
+  changed_when: false
+
