@@ -7,43 +7,56 @@
 - name: Set active master for initialization
   ansible.builtin.set_fact:
     # We take the first host from the list of those who are on the network
-    first_available_master: "{{ ansible_play_hosts | first }}"
+    k8s_master_first_available_master: "{{ ansible_play_hosts | first }}"
   run_once: true
 
 - name: Check for kubelet config (Any K8s node)
   ansible.builtin.stat:
     path: /etc/kubernetes/kubelet.conf
-  register: k8s_joined
+  register: k8s_master_k8s_joined
 
 - name: Check for admin config (Control-plane leader only)
   ansible.builtin.stat:
     path: /etc/kubernetes/admin.conf
-  register: k8s_init
+  register: k8s_master_k8s_init
 
 - name: Identify an active control-plane leader
   ansible.builtin.set_fact:
-    active_admin_node: >
+    k8s_master_active_admin_node: >
       {{
         ansible_play_hosts |
         map('extract', hostvars) |
-        selectattr('k8s_init.stat.exists', 'equalto', true) |
+        selectattr('k8s_master_k8s_init.stat.exists', 'equalto', true) |
         map(attribute='inventory_hostname') |
         list | first |
-        default(first_available_master)
+        default(k8s_master_first_available_master)
       }}
   run_once: true
 
 - name: Set global cluster status facts
   ansible.builtin.set_fact:
     # We check if the file exists on at least one master, which means the cluster is already initialized
-    any_master_initialized: "{{ groups['masters'] | map('extract', hostvars, ['k8s_joined', 'stat', 'exists']) | select('true') | list | length > 0 }}"
+    k8s_master_any_master_initialized: >
+      {{
+        groups['masters'] |
+        map('extract', hostvars, ['k8s_master_k8s_joined', 'stat', 'exists']) |
+        select('true') | list |
+        length > 0
+      }}
+
     # We check if the file does not exist on any master, which means the cluster is not initialized at all
-    all_masters_empty: "{{ groups['masters'] | map('extract', hostvars, ['k8s_joined', 'stat', 'exists']) | select('true') | list | length == 0 }}"
+    k8s_master_all_masters_empty: >
+      {{
+        groups['masters'] |
+        map('extract', hostvars, ['k8s_master_k8s_joined', 'stat', 'exists']) |
+        select('true') | list |
+        length == 0
+      }}
   run_once: true
 
 - name: Generate bootstrap token
   ansible.builtin.set_fact:
-    bootstrap_token: >
+    k8s_master_bootstrap_token: >
       {{ lookup('password', '/dev/null chars=ascii_lowercase,digits length=6') }}.{{
          lookup('password', '/dev/null chars=ascii_lowercase,digits length=16')
       }}
@@ -54,17 +67,17 @@
     src: kubeadm-init.yaml.j2
     dest: /etc/kubernetes/kubeadm-init.yaml
     mode: '0644'
-  when: inventory_hostname == first_available_master
+  when: inventory_hostname == k8s_master_first_available_master
 
 - name: Initialize first master
   ansible.builtin.command: >
     kubeadm init
     --config /etc/kubernetes/kubeadm-init.yaml
     --upload-certs
-  register: kubeadm_init_raw
+  register: k8s_master_kubeadm_init_raw
   when:
-    - inventory_hostname == first_available_master
-    - all_masters_empty
+    - inventory_hostname == k8s_master_first_available_master
+    - k8s_master_all_masters_empty
   args:
     creates: /etc/kubernetes/admin.conf
 
@@ -83,7 +96,7 @@
         src: /etc/kubernetes/admin.conf
         dest: "./k8s_admin.conf"
         flat: true
-      when: inventory_hostname == first_available_master
+      when: inventory_hostname == k8s_master_first_available_master
       run_once: true
 
     - name: Copy admin.conf from CI runner to all masters
@@ -96,11 +109,11 @@
         mode: '0600'
 
 - name: Generate join facts
-  when: inventory_hostname == active_admin_node
+  when: inventory_hostname == k8s_master_active_admin_node
   block:
     - name: Get join command
       ansible.builtin.command: kubeadm token create --print-join-command
-      register: worker_join_raw
+      register: k8s_master_worker_join_raw
       changed_when: false
 
     - name: Get certificate key
@@ -109,31 +122,31 @@
         kubeadm init phase upload-certs --upload-certs | tail -n 1
       args:
         executable: /bin/bash
-      register: cert_key_raw
+      register: k8s_master_cert_key_raw
       changed_when: false
 
     - name: Share join facts with all hosts
       ansible.builtin.set_fact:
-        master_join_cmd: >
-          {{ worker_join_raw.stdout }}
+        k8s_master_join_cmd: >
+          {{ k8s_master_worker_join_raw.stdout }}
           --control-plane
           --certificate-key
-          {{ cert_key_raw.stdout }}
+          {{ k8s_master_cert_key_raw.stdout }}
           --apiserver-bind-port
           {{ k8s_apiserver_bind_port }}
-          worker_join_cmd_fact: "{{ worker_join_raw.stdout }}"
+          worker_join_cmd_fact: "{{ k8s_master_worker_join_raw.stdout }}"
       delegate_to: "{{ item }}"
       delegate_facts: true
       loop: "{{ groups['all'] }}"
 
 - name: Join other masters
   ansible.builtin.command: >
-    {{ hostvars[active_admin_node]['master_join_cmd'] }}
+    {{ hostvars[k8s_master_active_admin_node]['master_join_cmd'] }}
     --node-name {{ inventory_hostname }}
     --apiserver-advertise-address={{ internal_ip }}
   when:
     - inventory_hostname in groups['masters']
-    - inventory_hostname != active_admin_node
-    - not k8s_joined.stat.exists
+    - inventory_hostname != k8s_master_active_admin_node
+    - not k8s_master_joined.stat.exists
   args:
     creates: /etc/kubernetes/kubelet.conf
