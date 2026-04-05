@@ -3,7 +3,6 @@ terraform {
   }
 }
 
-
 terraform {
   required_version = "~> 1.7.0"
   required_providers {
@@ -18,15 +17,12 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-
-
 resource "libvirt_volume" "ubuntu_base" {
   name   = "ubuntu-k8s.qcow2"
   pool   = "default"
   source = "/var/lib/libvirt/images/ubuntu-k8s.qcow2"
   format = "qcow2"
 }
-
 
 resource "libvirt_network" "k8s_net" {
   name      = "k8s-isolated-net"
