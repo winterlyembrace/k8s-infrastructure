@@ -17,7 +17,7 @@ stages:
 variables:
   # --- Full image paths ---
   TF_IMAGE: "${REGISTRY_PATH}/tf-runner:e339142b"
-  ANSIBLE_IMAGE: "${REGISTRY_PATH}/ansible-runner:4134ba22"
+  ANSIBLE_IMAGE: "${REGISTRY_PATH}/ansible-runner:16c13b7a"
   K8S_IMAGE: "${REGISTRY_PATH}/k8s-deployer:55ee5249"
 
   # --- Settings ---
