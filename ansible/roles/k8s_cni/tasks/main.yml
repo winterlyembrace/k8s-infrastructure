@@ -12,10 +12,15 @@
     release_namespace: kube-system
     create_namespace: true
     wait: true
+    wait_timeout: 600s
     values:
-      kubeProxyReplacement: "strict"
+      kubeProxyReplacement: true
       k8sServiceHost: "{{ cluster_internal_vip }}"
       k8sServicePort: "{{ k8s_api_public_port }}"
+      l2announcements:
+        enabled: true
+      externalIPs:
+        enabled: true
       
       hubble:
         enabled: true
