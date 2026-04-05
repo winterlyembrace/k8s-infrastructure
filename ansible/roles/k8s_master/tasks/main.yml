@@ -35,7 +35,7 @@
 
 - name: Set global cluster status facts
   ansible.builtin.set_fact:
-    # We check if the file exists on at least one master, which means the cluster is already initialized
+    # We check if the file exists on at least one master
     k8s_master_any_master_initialized: >
       {{
         groups['masters'] |
@@ -44,7 +44,7 @@
         length > 0
       }}
 
-    # We check if the file does not exist on any master, which means the cluster is not initialized at all
+    # We check if the file does not exist on any master
     k8s_master_all_masters_empty: >
       {{
         groups['masters'] |
@@ -57,7 +57,9 @@
 - name: Generate bootstrap token
   ansible.builtin.set_fact:
     k8s_master_bootstrap_token: >
-      {{ lookup('password', '/dev/null chars=ascii_lowercase,digits length=6') }}.{{
+      {{
+         lookup('password', '/dev/null chars=ascii_lowercase,digits length=6')
+      }}.{{
          lookup('password', '/dev/null chars=ascii_lowercase,digits length=16')
       }}
   run_once: true
