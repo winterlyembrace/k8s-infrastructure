@@ -1,0 +1,6 @@
+---
+- name: Reset k8s config
+  hosts: all
+  become: true
+  roles:
+    - reset_k8s

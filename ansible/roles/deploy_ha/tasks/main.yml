@@ -14,8 +14,8 @@
         state: present
         reload: true
       loop:
-        - { key: 'net.ipv4.ip_nonlocal_bind', value: '1' }
-        - { key: 'net.ipv4.ip_forward', value: '1' }
+        - {key: 'net.ipv4.ip_nonlocal_bind', value: '1'}
+        - {key: 'net.ipv4.ip_forward', value: '1'}
 
 - name: Deploy Keepalived configuration
   ansible.builtin.template:
@@ -55,4 +55,3 @@
     delay: 5
   delegate_to: "{{ groups['workers'][0] }}"
   run_once: true
-

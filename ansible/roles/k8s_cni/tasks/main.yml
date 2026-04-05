@@ -21,7 +21,6 @@
         enabled: true
       externalIPs:
         enabled: true
-      
       hubble:
         enabled: true
         ui:
@@ -35,10 +34,8 @@
             - tcp
             - icmp
             - http
-            
       ipam:
         mode: "kubernetes"
-        
       operator:
         prometheus:
           enabled: true
@@ -49,4 +46,3 @@
     cmd: "kubectl wait --for=condition=Ready nodes --all --timeout=300s"
   delegate_to: localhost
   changed_when: false
-

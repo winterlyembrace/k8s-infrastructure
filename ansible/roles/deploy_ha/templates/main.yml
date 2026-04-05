@@ -1,3 +1,4 @@
+---
 - name: Deploy Keepalived config from template
   ansible.builtin.template:
     src: keepalived.conf.j2

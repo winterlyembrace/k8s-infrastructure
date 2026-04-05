@@ -22,7 +22,15 @@
 
 - name: Identify an active control-plane leader
   ansible.builtin.set_fact:
-    active_admin_node: "{{ ansible_play_hosts | map('extract', hostvars) | selectattr('k8s_init.stat.exists', 'equalto', true) | map(attribute='inventory_hostname') | list | first | default(first_available_master) }}"
+    active_admin_node: >
+      {{
+        ansible_play_hosts |
+        map('extract', hostvars) |
+        selectattr('k8s_init.stat.exists', 'equalto', true) |
+        map(attribute='inventory_hostname') |
+        list | first |
+        default(first_available_master)
+      }}
   run_once: true
 
 - name: Set global cluster status facts
@@ -106,8 +114,14 @@
 
     - name: Share join facts with all hosts
       ansible.builtin.set_fact:
-        master_join_cmd: "{{ worker_join_raw.stdout }} --control-plane --certificate-key {{ cert_key_raw.stdout }} --apiserver-bind-port {{ k8s_apiserver_bind_port }}"
-        worker_join_cmd_fact: "{{ worker_join_raw.stdout }}"
+        master_join_cmd: >
+          {{ worker_join_raw.stdout }}
+          --control-plane
+          --certificate-key
+          {{ cert_key_raw.stdout }}
+          --apiserver-bind-port
+          {{ k8s_apiserver_bind_port }}
+          worker_join_cmd_fact: "{{ worker_join_raw.stdout }}"
       delegate_to: "{{ item }}"
       delegate_facts: true
       loop: "{{ groups['all'] }}"

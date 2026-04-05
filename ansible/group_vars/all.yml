@@ -1,3 +1,4 @@
+---
 cluster_external_vip: "192.168.122.200"
 cluster_internal_vip: "192.168.100.200"
 k8s_api_public_port: 6443

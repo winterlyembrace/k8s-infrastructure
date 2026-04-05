@@ -46,10 +46,10 @@
     reload: false
     sysctl_file: /etc/sysctl.d/99-k8s-network.conf
   loop:
-    - { key: 'net.ipv4.conf.all.send_redirects' }
-    - { key: 'net.ipv4.conf.default.send_redirects' }
-    - { key: 'net.ipv4.conf.ens4.send_redirects' }
-    - { key: 'net.ipv4.conf.ens3.send_redirects' }
+    - {key: 'net.ipv4.conf.all.send_redirects'}
+    - {key: 'net.ipv4.conf.default.send_redirects'}
+    - {key: 'net.ipv4.conf.ens4.send_redirects'}
+    - {key: 'net.ipv4.conf.ens3.send_redirects'}
 
 - name: Install Containerd
   ansible.builtin.apt:
@@ -80,8 +80,10 @@
     regexp: "{{ item.regexp }}"
     replace: "{{ item.replace }}"
   loop:
-    - { regexp: 'SystemdCgroup = false', replace: 'SystemdCgroup = true' }
-    - { regexp: 'sandbox_image = "registry.k8s.io/pause:3.8"', replace: 'sandbox_image = "registry.k8s.io/pause:3.9"' }
+    - regexp: 'SystemdCgroup = false'
+      replace: 'SystemdCgroup = true'
+    - regexp: 'sandbox_image = "registry.k8s.io/pause:3.8"'
+      replace: 'sandbox_image = "registry.k8s.io/pause:3.9"'
 
 - name: Ensure containerd is running for image pull
   ansible.builtin.systemd:
