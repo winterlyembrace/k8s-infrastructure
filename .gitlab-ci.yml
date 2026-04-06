@@ -16,7 +16,7 @@ stages:
 
 variables:
   # --- Full image paths ---
-  TF_IMAGE: "${REGISTRY_PATH}/tf-runner:e339142b"
+  TF_IMAGE: "${REGISTRY_PATH}/tf-runner:40004d34"
   ANSIBLE_IMAGE: "${REGISTRY_PATH}/ansible-runner:f649be37"
   K8S_IMAGE: "${REGISTRY_PATH}/k8s-deployer:55ee5249"
 
@@ -113,8 +113,6 @@ terraform_apply:
     entrypoint: [""]
   tags:
     - cluster-runner
-  before_script:
-    - apk add --no-cache cdrkit
   script:
     - cd "${TF_ROOT}"
     - >
