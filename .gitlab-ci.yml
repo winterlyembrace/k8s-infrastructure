@@ -36,13 +36,24 @@ variables:
 
 # --- Validation Jobs ---
 
-terraform_validate:
+.tf_lint_template:
   stage: Lints & Checks
   image:
     name: ${TF_IMAGE}
     entrypoint: [""]
   tags:
     - cluster-runner
+
+.ansible_lint_template:
+  stage: Lints & Checks
+  image:
+    name: ${ANSIBLE_IMAGE}
+    entrypoint: [""]
+  tags:
+    - cluster-runner
+
+terraform_validate:
+  extends: [.tf_lint_template]
   script:
     - cd "${TF_ROOT}"
     - terraform init -backend=false
@@ -50,44 +61,24 @@ terraform_validate:
     - terraform validate
 
 terraform_tflint:
-  stage: Lints & Checks
-  image:
-    name: ${TF_IMAGE}
-    entrypoint: [""]
-  tags:
-    - cluster-runner
+  extends: [.tf_lint_template]
   script:
     - cd "${TF_ROOT}"
     - tflint --init
     - tflint --recursive
 
 terraform_tfsec:
-  stage: Lints & Checks
-  image:
-    name: ${TF_IMAGE}
-    entrypoint: [""]
-  tags:
-    - cluster-runner
+  extends: [.tf_lint_template]
   script:
     - tfsec "${TF_ROOT}"
 
 ansible_yamllint:
-  stage: Lints & Checks
-  image:
-    name: ${ANSIBLE_IMAGE}
-    entrypoint: [""]
-  tags:
-    - cluster-runner
+  extends: [.ansible_lint_template]
   script:
     - yamllint "${ANSIBLE_ROOT}"
 
 ansible_lint:
-  stage: Lints & Checks
-  image: 
-    name: ${ANSIBLE_IMAGE}
-    entrypoint: [""]
-  tags:
-    - cluster-runner
+  extends: [.ansible_lint_template]
   before_script:
     - cd "${ANSIBLE_ROOT}"
   script:
@@ -110,7 +101,6 @@ terraform_plan:
       -backend-config="lock_method=POST"
       -backend-config="unlock_method=DELETE"
       -backend-config="retry_wait_min=5"
-    - terraform destroy -auto-approve
     - terraform plan -out=tfplan
   artifacts:
     paths:

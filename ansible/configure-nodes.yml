@@ -3,7 +3,7 @@
   hosts: masters
   become: true
   roles:
-    - deploy_ha
+ #   - deploy_ha
     - k8s_master
 
 - name: Configure Worker Nodes
