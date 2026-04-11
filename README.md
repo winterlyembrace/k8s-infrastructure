@@ -1,8 +1,8 @@
-## k8s-infrastructure
+# k8s-infrastructure
 
 Kubernetes Bare-Metal Infrastructure provisioning and management (IaC, High Availability, Immutable Infrastructure)
 
-## 🧩 The Ecosystem
+# 🧩 The Ecosystem
 This project is part of a distributed GitOps architecture across several repositories:
 * **Infrastructure (This Repo):** Bare-metal provisioning with Terraform, Ansible, and Packer.
 * **[GitOps Config](https://github.com/winterlyembrace/k8s-gitops-config):** Cluster state, FluxCD manifests, and Helm releases.
@@ -13,14 +13,14 @@ This repository contains a complete Infrastructure as Code (IaC) and Gitlab CI w
 
 The project covers everything from machine image creation to application deployment via GitOps, ensuring a fully automated "zero-to-cluster" experience.
 
-## 🚀 Project Architecture
+# 🚀 Project Architecture
 
 ![Diagram](k8s-infrastructure-diagram.drawio.png)
 
 The deployment is split into three main phases:
 
 
-# Image Provisioning (Packer)
+## Image Provisioning (Packer)
 
 Packer is used to build optimized Debian/Ubuntu images.
 
@@ -29,7 +29,7 @@ Pre-installed dependencies: kubeadm, kubelet and container runtime (containerd).
 Ensures consistent environments across all nodes and speeds up cluster bootstrapping.
 
 
-# Infrastructure & Bootstrapping (Terraform & Ansible)
+## Infrastructure & Bootstrapping (Terraform & Ansible)
 
 Terraform: Provisions the underlying virtual infrastructure (virtual machines, networking, storage).
 
@@ -38,7 +38,7 @@ Ansible: Configures HAProxy and Keepalived to provide a High Availability Contro
 GitLab CI: Orchestrates the entire flow, from Terraform plan/apply to Ansible playbooks.
 
 
-# GitOps & Application Layer (FluxCD)
+## GitOps & Application Layer (FluxCD)
 
 Once the cluster is live, FluxCD from another repository (https://github.com/winterlyembrace/k8s-gitops-config) takes over to manage cluster state:
 
@@ -51,7 +51,7 @@ Modern Ingress: Implemented via Cilium Gateway API (HTTPRoute) for advanced L7 t
 Synchronization: Ensures the cluster state always matches the configuration in the Git repository.
 
 
-# 🛠 Tech Stack
+## 🛠 Tech Stack
 
 
 IaC: Terraform, Packer
@@ -72,7 +72,7 @@ CI/CD: GitLab CI, FluxCD
 Platform: KVM/libvirt (Bare-Metal)
 
 
-# 🗺 Roadmap & Future Enhancements
+## 🗺 Roadmap & Future Enhancements
 
 
 [ ] Pure GitOps Infrastructure: Migrate from GitLab CI/Ansible to a Tofu-controller (OpenTofu) managed from a dedicated Management Cluster.
