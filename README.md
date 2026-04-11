@@ -1,7 +1,5 @@
 # k8s-infrastructure
 
- k8s-infrastructure
-
 Kubernetes Bare-Metal Infrastructure provisioning and management (IaC, High Availability, Immutable Infrastructure)
 
 ## 🧩 The Ecosystem
@@ -9,7 +7,7 @@ This project is part of a distributed GitOps architecture across several reposit
 * **Infrastructure (This Repo):** Bare-metal provisioning with Terraform, Ansible, and Packer.
 * **[GitOps Config](https://github.com/winterlyembrace/k8s-gitops-config):** Cluster state, FluxCD manifests, and Helm releases.
 * **[CI Tooling](https://github.com/winterlyembrace/ci-toolkit)**: Optimized build images (Kaniko, Trivy).
-* **[Demo Application](https://github.com/winterlyembrace/chpod)**: The source code for the Full-stack App (Python + React).## 🧩 The Ecosystem
+* **[Demo Application](https://github.com/winterlyembrace/chpod)**: The source code for the Full-stack App (Python + React).
 
 This repository contains a complete Infrastructure as Code (IaC) and Gitlab CI workflow to provision and manage a highly available multi-node Kubernetes cluster from scratch on Libvirt/KVM virtual machines.
 
@@ -17,37 +15,56 @@ The project covers everything from machine image creation to application deploym
 
 🚀 Project Architecture
 
+```mermaid
 graph TD
-    subgraph "Provisioning"
-        P[Packer] --> |OS Images| KVM[(KVM / Libvirt)]
-        TF[Terraform] --> |VMs/Network| KVM
-        AN[Ansible] --> |K8s Bootstrap| KVM
+    %% Определение внешних сущностей
+    Admin((Admin/CI))
+    User((User))
+
+    subgraph Provisioning [Provisioning Phase]
+        P[Packer]
+        TF[Terraform]
+        AN[Ansible]
     end
 
-    subgraph "Bare-Metal Cluster"
-        subgraph "Control Plane (High Availability)"
-            VIP((Virtual IP)) --> HA[HAProxy + Keepalived]
-            HA --> M1[Master 1]
-            HA --> M2[Master 2]
-            HA --> M3[Master 3]
+    subgraph Cluster [Bare-Metal Cluster]
+        subgraph CP [Control Plane HA]
+            VIP["Virtual IP (Keepalived)"]
+            LB[HAProxy]
+            M1[Master 1]
+            M2[Master 2]
+            M3[Master 3]
+            
+            VIP --> LB
+            LB --> M1 & M2 & M3
         end
         
-        subgraph "Data Plane"
+        subgraph DP [Data Plane]
             W1[Worker 1]
             W2[Worker 2]
-            Cilium[Cilium CNI] -.-> W1
-            Cilium -.-> W2
+            Cilium["Cilium (L2 Announce / GW API)"]
+            
+            W1 & W2 --- Cilium
         end
 
-        Flux[FluxCD Operator] -->|Internal Sync| VIP
+        Flux[FluxCD]
     end
 
-    Admin((Admin)) -->|kubectl| VIP
-    User((User)) -->|External IP / L2 Announcement| Cilium
+    %% Связи между фазами
+    P -->|Images| Cluster
+    TF -->|VMs & Network| Cluster
+    AN -->|Kubeadm Bootstrap| Cluster
+
+    %% Потоки управления и трафика
+    Admin -->|kubectl| VIP
+    Flux -->|Sync Manifests| VIP
+    User -->|HTTP/App Traffic| Cilium
     
+    %% Стилизация
     style VIP fill:#f9f,stroke:#333,stroke-width:2px
     style Cilium fill:#bbf,stroke:#333,stroke-width:2px
-
+    style Provisioning fill:#f5f5f5,stroke:#d3d3d3,stroke-dasharray: 5 5
+```
 
 The deployment is split into three main phases:
 
