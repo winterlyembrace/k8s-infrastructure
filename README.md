@@ -17,17 +17,18 @@ The project covers everything from machine image creation to application deploym
 
 ```mermaid
 graph TD
-    %% Определение внешних сущностей
+    %% Внешние сущности
     Admin((Admin/CI))
     User((User))
 
-    subgraph Provisioning [Provisioning Phase]
-        P[Packer]
-        TF[Terraform]
-        AN[Ansible]
+    subgraph Provisioning [1. Provisioning Phase]
+        P[Packer] -->|Immutable Images| KVM
+        TF[Terraform] -->|VMs & Network| KVM
+        AN[Ansible] -->|Kubeadm Bootstrap| KVM
+        KVM[(Libvirt/KVM)]
     end
 
-    subgraph Cluster [Bare-Metal Cluster]
+    subgraph Cluster [2. Kubernetes Cluster]
         subgraph CP [Control Plane HA]
             VIP["Virtual IP (Keepalived)"]
             LB[HAProxy]
@@ -43,26 +44,31 @@ graph TD
             W1[Worker 1]
             W2[Worker 2]
             Cilium["Cilium (L2 Announce / GW API)"]
+            App[Fullstack App]
             
             W1 & W2 --- Cilium
+            Cilium --> App
         end
 
-        Flux[FluxCD]
+        subgraph Security [Security & GitOps]
+            Flux[FluxCD]
+            Vault[(HashiCorp Vault)]
+            ESO[External Secrets]
+            
+            Flux -->|Sync| VIP
+            ESO -->|Fetch| Vault
+            ESO -.->|Inject| App
+        end
     end
 
-    %% Связи между фазами
-    P -->|Images| Cluster
-    TF -->|VMs & Network| Cluster
-    AN -->|Kubeadm Bootstrap| Cluster
-
-    %% Потоки управления и трафика
+    %% Потоки трафика
     Admin -->|kubectl| VIP
-    Flux -->|Sync Manifests| VIP
-    User -->|HTTP/App Traffic| Cilium
-    
+    User -->|App Traffic| Cilium
+
     %% Стилизация
     style VIP fill:#f9f,stroke:#333,stroke-width:2px
     style Cilium fill:#bbf,stroke:#333,stroke-width:2px
+    style Vault fill:#fff2cc,stroke:#d6b656,stroke-width:2px
     style Provisioning fill:#f5f5f5,stroke:#d3d3d3,stroke-dasharray: 5 5
 ```
 
