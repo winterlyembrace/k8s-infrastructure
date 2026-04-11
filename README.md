@@ -15,7 +15,7 @@ The project covers everything from machine image creation to application deploym
 
 ## 🚀 Project Architecture
 
-
+![Diagram](k8s-infrastructure-diagram.drawio.png)
 
 The deployment is split into three main phases:
 
