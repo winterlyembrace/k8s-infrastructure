@@ -4,6 +4,12 @@
     name: cilium
     repo_url: "https://helm.cilium.io/"
 
+- name: Install Gateway API CRDs
+  kubernetes.core.k8s:
+    definition: "{{ item }}"
+  loop:
+    - https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.0.0/standard-install.yaml
+
 - name: Install Cilium CNI via Helm
   kubernetes.core.helm:
     name: cilium
@@ -18,6 +24,8 @@
       k8sServiceHost: "{{ cluster_internal_vip }}"
       k8sServicePort: "{{ k8s_api_public_port }}"
       l2announcements:
+        enabled: true
+      gatewayAPI:
         enabled: true
       externalIPs:
         enabled: true

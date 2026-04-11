@@ -14,3 +14,13 @@
   changed_when: k8s_worker_join.rc == 0
   args:
     creates: /etc/kubernetes/kubelet.conf
+
+- name: Label worker nodes for Cilium L2 Announcement
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: v1
+      kind: Node
+      metadata:
+        name: "{{ inventory_hostname }}"
+        labels:
+          node-role.com/type: worker
