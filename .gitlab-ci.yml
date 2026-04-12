@@ -29,10 +29,17 @@ variables:
   TF_ADDRESS: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/production"
   TF_HTTP_USERNAME: "gitlab-ci-token"
   TF_HTTP_PASSWORD: "${CI_JOB_TOKEN}"
-  TF_VAR_ssh_key: "${PUBLIC_SSH_KEY_PATH}"
 
   ANSIBLE_CONFIG: "${ANSIBLE_ROOT}/ansible.cfg"
   ANSIBLE_HOST_KEY_CHECKING: "False"
+
+.vault_secrets_template:
+  id_tokens:
+    VAULT_ID_TOKEN:
+      aud: "https://gitlab.com"
+  variables:
+    VAULT_AUTH_ROLE: "gitlab-runner-role"
+    VAULT_SERVER_URL: "http://vault.local:8200"
 
 # --- Validation Jobs ---
 
@@ -85,6 +92,11 @@ ansible_lint:
     - ansible-lint
 
 terraform_plan:
+  extends: [.vault_secrets_template]
+  secrets:
+    TF_VAR_ssh_key:
+      vault: production/ci-secrets/PUBLIC_SSH_KEY@secret
+      token: $VAULT_ID_TOKEN
   stage: Terraform plan
   image:
     name: hashicorp/terraform:1.7.5
@@ -107,6 +119,11 @@ terraform_plan:
       - "${TF_ROOT}/tfplan"
 
 terraform_apply:
+  extends: [.vault_secrets_template]
+  secrets:
+    TF_VAR_ssh_key:
+      vault: production/ci-secrets/PUBLIC_SSH_KEY@secret
+      token: $VAULT_ID_TOKEN
   stage: Infrastructure Provision
   image:
     name: hashicorp/terraform:1.7.5
@@ -139,6 +156,11 @@ terraform_apply:
       - "${ANSIBLE_ROOT}/inventory.json"
 
 configure_k8s:
+  extends: [.vault_secrets_template]
+  secrets:
+    SSH_PRIVATE_KEY_BASE64:
+      vault: production/ci-secrets/SSH_PRIVATE_KEY@secret
+      token: $VAULT_ID_TOKEN
   stage: K8s Setup
   image: 
     name: ${ANSIBLE_IMAGE}
