@@ -1,10 +1,12 @@
+# Remote backend configuration for state management via HTTP API
 terraform {
   backend "http" {
   }
 }
 
+# Version constraints and provider definitions
 terraform {
-  required_version = "~> 1.7.0"
+  required_version = "1.7.5"
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
@@ -13,10 +15,12 @@ terraform {
   }
 }
 
+# Configure the libvirt provider to connect to the local QEMU/KVM system
 provider "libvirt" {
   uri = "qemu:///system"
 }
 
+# Base OS image volume for cloning virtual machine disks
 resource "libvirt_volume" "ubuntu_base" {
   name   = "ubuntu-k8s.qcow2"
   pool   = "default"
@@ -24,6 +28,7 @@ resource "libvirt_volume" "ubuntu_base" {
   format = "qcow2"
 }
 
+# Isolated network configuration without DHCP/DNS for manual IP management
 resource "libvirt_network" "k8s_net" {
   name      = "k8s-isolated-net"
   mode      = "none"
@@ -38,6 +43,7 @@ resource "libvirt_network" "k8s_net" {
   }
 }
 
+# Map logic to generate structured configuration for both master and worker nodes
 locals {
   k8s_nodes = merge(
     { for i in range(var.master_count) : format("master-%02d", i + 1) => {
@@ -59,6 +65,7 @@ locals {
   )
 }
 
+# Instantiate KVM virtual machines using a custom module for each defined node
 module "kvm_instance" {
   source    = "./modules/kvm_instance"
   for_each  = local.k8s_nodes

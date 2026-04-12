@@ -1,16 +1,22 @@
+# The system username to be created and used inside all virtual machines
 variable "user_name" {
   type = string
 }
 
+# Public SSH key to be injected into the virtual machines for the user_name account
 variable "ssh_key" {
   description = "User's public SSH key"
   type        = string
   sensitive   = true
 }
 
+# Number of master nodes to provision in the cluster
 variable "master_count" { type = number }
+
+# Number of worker nodes to provision in the cluster
 variable "worker_count" { type = number }
 
+# Resource profiles for master and worker nodes
 variable "node_configs" {
   type = map(object({
     cpu       = number
@@ -18,10 +24,6 @@ variable "node_configs" {
     disk_size = number
     wan       = bool
   }))
-  default = {
-    "master" = { cpu = 2, ram = 1536, disk_size = 15, wan = true }
-    "worker" = { cpu = 2, ram = 2048, disk_size = 15, wan = true }
-  }
 }
 
 
